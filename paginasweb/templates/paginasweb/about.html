@@ -1,0 +1,45 @@
+{% extends "paginasweb/models/base.html" %}
+{% load static %}
+
+{% block title %}Sobre - Assistente Financeiro{% endblock %}
+
+{% block header %}
+<header class="masthead" style="background-image: url('{% static "assets/img/about-bg.jpg" %}')">
+  <div class="container position-relative px-4 px-lg-5">
+    <div class="row gx-4 gx-lg-5 justify-content-center">
+      <div class="col-md-10 col-lg-8 col-xl-7">
+        <div class="page-heading">
+          <h1>Sobre o Projeto</h1>
+          <span class="subheading">Saiba mais sobre o projeto Assistente Financeiro</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+{% endblock header %}
+
+{% block content %}
+<div class="container my-5">
+  <h2>Visão Geral do Projeto</h2>
+  <p>
+    Este projeto tem como objetivo desenvolver uma aplicação Assistente Financeiro utilizando Django. O sistema gerenciará despesas, cheques, contas e transações,
+    proporcionando uma interface amigável e um design moderno.
+  </p>
+  
+  <h3>Diagrama de Caso de Uso</h3>
+  <p>
+    O diagrama abaixo ilustra as principais funcionalidades e os atores envolvidos:
+  </p>
+  <img src="{% static 'assets/diagrams/Diagrama Caso de Uso NAES.png' %}" alt="Diagrama de Caso de Uso" class="img-fluid mb-5">
+
+  <h3>Diagrama de Classes</h3>
+  <p>
+    O diagrama a seguir mostra as classes principais e os seus relacionamentos:
+  </p>
+  <img src="{% static 'assets/diagrams/Diagrama Classe NAES.png' %}" alt="Diagrama de Classes" class="img-fluid mb-5">
+
+  <p>
+    Essa documentação ajuda a esclarecer a estrutura geral e as decisões de design aplicadas durante o desenvolvimento do projeto.
+  </p>
+</div>
+{% endblock content %}
