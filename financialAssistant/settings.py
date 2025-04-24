@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'paginasweb',
+    
+    'paginasweb',     #app de views/templates
+    'core',           #app de domínio
 ]
 
 MIDDLEWARE = [
