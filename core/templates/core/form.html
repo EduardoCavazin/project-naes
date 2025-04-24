@@ -1,8 +1,49 @@
 {% extends "paginasweb/models/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block extra_head %}
+  <style>
+    /* Ajuste fino de fonte e espaçamento */
+    .card-form {
+      font-size: 1.1rem;
+    }
+  </style>
+{% endblock extra_head %}
+
+{% block header %}
+<div class="container mt-5">
+  <div class="text-center">
+    <h2 class="display-6 fw-bold text-gradient">{{ titulo }}</h2>
+    <p class="text-muted">Preencha os campos abaixo para prosseguir</p>
+  </div>
+</div>
+{% endblock header %}
+
 {% block content %}
-  <h2>{{ titulo }}</h2>
-  <form method="post">{% csrf_token %}
-    {{ form.as_p }}
-    <button class="btn btn-primary" type="submit">Salvar</button>
-  </form>
-{% endblock %}
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm card-form">
+        <div class="card-body p-4">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="d-flex justify-content-end mt-4">
+              <button type="submit" class="btn btn-primary me-2">
+                <i class="fas fa-save me-1"></i> Salvar
+              </button>
+              <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+  <!-- Se precisar de scripts específicos no form, coloque aqui -->
+{% endblock extra_js %}
