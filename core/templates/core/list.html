@@ -1,0 +1,43 @@
+{% extends "paginasweb/models/base.html" %}
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <h2>{{ titulo }}</h2>
+  <a href="{% url 'expense-create' %}" class="btn btn-success mb-3">Nova Despesa</a>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Descrição</th>
+        <th>Valor</th>
+        <th>Data</th>
+        <th>Categoria</th>
+        <th>Método</th>
+        <th>Conta</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for obj in object_list %}
+      <tr>
+        <td>{{ obj.description }}</td>
+        <td>{{ obj.value }}</td>
+        <td>{{ obj.date }}</td>
+        <td>{{ obj.category.name }}</td>
+        <td>{{ obj.payment_method.name }}</td>
+        <td>{{ obj.account.identifier }}</td>
+        <td>
+          <a href="{% url 'expense-update' obj.pk %}" class="btn btn-sm btn-primary">Editar</a>
+          <a href="{% url 'expense-delete' obj.pk %}" class="btn btn-sm btn-danger">Excluir</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="text-center">Nenhuma despesa cadastrada.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
