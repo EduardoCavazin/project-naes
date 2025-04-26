@@ -1,10 +1,13 @@
-{% extends "paginasweb/models/base.html" %}
-{% block title %}{{ titulo }}{% endblock %}
+{% extends "core/models/confirm_delete_base.html" %}
+
+{% block title %}Excluir Despesa{% endblock %}
+
 {% block content %}
   <div class="container my-5 text-center">
     <h2>{{ titulo }}</h2>
-    <p>Tem certeza que deseja excluir <strong>{{ object }}</strong>?</p>
-    <form method="post">{% csrf_token %}
+    <p>Tem certeza que deseja excluir a despesa <strong>{{ object }}</strong>?</p>
+    <form method="post">
+      {% csrf_token %}
       <button class="btn btn-danger me-2">Excluir</button>
       <a class="btn btn-secondary" href="javascript:history.back()">Cancelar</a>
     </form>

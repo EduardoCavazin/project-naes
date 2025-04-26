@@ -36,6 +36,18 @@
           <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'expense-list' %}">Despesas</a></li>
+          <li class="nav-item">
+            <a href="#"
+               class="nav-link"
+               onclick="
+                 if (!confirm('Você é o admin?')) return false;
+                 if (!confirm('Você não tá mentindo pra mim né?')) return false;
+                 window.location.href = '{% url "paymentmethod-list" %}';
+                 return false;
+               ">
+              Métodos de Pagamento
+            </a>
+          </li>
           {% comment %} <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li> {% endcomment %}
         </ul>
       </div>

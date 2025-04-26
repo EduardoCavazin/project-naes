@@ -1,0 +1,9 @@
+{# core/templates/core/form_expense.html #}
+{% extends "core/models/form_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block form_title %}Cadastrar Despesa{% endblock form_title %}
+{% block form_subtitle %}<p class="text-muted">Informe os dados da sua despesa</p>{% endblock %}
+{% block form_fields %}
+  {{ form|crispy }}
+{% endblock %}
