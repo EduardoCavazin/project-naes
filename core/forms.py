@@ -1,5 +1,5 @@
 from django import forms
-from .models import Expense, PaymentMethod
+from .models import Expense, PaymentMethod, Cheque
 import datetime
 import json
 
@@ -54,5 +54,49 @@ class ExpenseForm(forms.ModelForm):
     def clean_value(self):
         value = self.cleaned_data.get('value')
         if isinstance(value, str):
+            value = value.replace('R$', '').replace(' ', '').replace('.', '').replace(',', '.')
+        return value
+
+class ChequeForm(forms.ModelForm):
+    class Meta:
+        model = Cheque
+        fields = [
+            'number',
+            'value',
+            'issue_date',
+            'compensation_date',
+            'recipient',
+            'account',
+            'user',
+            'status',
+        ]
+        widgets = {
+            'value': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'R$ 0,00',
+            }),
+            'issue_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+            }),
+            'compensation_date': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'form-control',
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if not self.instance.pk:
+            self.fields['issue_date'].initial = datetime.date.today()
+            self.fields['compensation_date'].initial = datetime.date.today()
+            
+    def clean_value(self):
+        """
+        Converte o valor formatado (R$ 1.234,56) para decimal (1234.56)
+        """
+        value = self.cleaned_data.get('value')
+        if isinstance(value, str):
+            # Remove R$, espaços e substitui vírgula por ponto
             value = value.replace('R$', '').replace(' ', '').replace('.', '').replace(',', '.')
         return value

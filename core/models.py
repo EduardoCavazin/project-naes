@@ -59,8 +59,35 @@ class Expense(Transaction):
 
 
 class Cheque(Transaction):
-    number            = models.CharField("Número", max_length=50)
-    issue_date        = models.DateField("Emissão")
+    CHEQUE_STATUS = [
+        ('pending', 'Pendente'),
+        ('cashed', 'Compensado'),
+        ('canceled', 'Cancelado'),
+    ]
+    number = models.CharField("Número", max_length=50)
+    issue_date = models.DateField("Emissão")
     compensation_date = models.DateField("Compensação")
-    recipient         = models.CharField("Beneficiário", max_length=200)
-    account           = models.ForeignKey(Account, on_delete=models.PROTECT, verbose_name="Conta")
+    recipient = models.CharField("Beneficiário", max_length=200)
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, verbose_name="Conta")
+    status = models.CharField("Status", max_length=10, choices=CHEQUE_STATUS, default='pending')
+    
+    def __str__(self):
+        return f"Cheque {self.number} - {self.recipient}"
+    
+    def save(self, *args, **kwargs):
+        # Garantir que o tipo seja sempre 'cheque'
+        self.type = 'cheque'
+        # Usar a data de compensação como data da transação para fins contábeis
+        self.date = self.compensation_date
+        super().save(*args, **kwargs)
+    
+    def mark_as_cashed(self):
+        """Marca o cheque como compensado e atualiza o saldo da conta"""
+        if self.status != 'cashed':
+            self.status = 'cashed'
+            self.save()
+    
+    def cancel(self):
+        """Cancela o cheque"""
+        self.status = 'canceled'
+        self.save()

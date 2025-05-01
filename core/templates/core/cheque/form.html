@@ -1,0 +1,101 @@
+{% extends "core/models/form_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block form_title %}{{ titulo }}{% endblock form_title %}
+{% block form_subtitle %}
+  <p class="text-muted">Informe os dados do cheque</p>
+{% endblock form_subtitle %}
+
+{% block form_fields %}
+  {{ form|crispy }}
+{% endblock form_fields %}
+
+{% block extra_js %}
+  <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/cleave.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const valueInput = document.getElementById('id_value');
+      const compensationDateInput = document.getElementById('id_compensation_date');
+      const statusSelect = document.getElementById('id_status');
+      
+      // Formato da máscara de moeda
+      if (valueInput) {
+        valueInput.value = '';
+      }
+      
+      let currentAmount = '0';
+      
+      function updateDisplay() {
+        let intPart = currentAmount.slice(0, -2) || '0';
+        let decPart = currentAmount.slice(-2).padStart(2, '0');
+        
+        if (intPart.length > 3) {
+          intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        
+        valueInput.value = `R$ ${intPart},${decPart}`;
+      }
+      
+      updateDisplay();
+      
+      valueInput.addEventListener('keydown', function(e) {
+        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+          return;
+        }
+        
+        e.preventDefault();
+        
+        if (/^\d$/.test(e.key)) {
+          currentAmount = currentAmount + e.key;
+          currentAmount = currentAmount.replace(/^0+/, '');
+          
+          if (currentAmount === '') {
+            currentAmount = '0';
+          }
+          
+          updateDisplay();
+        }
+      });
+      
+      valueInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Backspace') {
+          currentAmount = currentAmount.slice(0, -1);
+          
+          if (currentAmount === '') {
+            currentAmount = '0';
+          }
+          
+          updateDisplay();
+        }
+      });
+      
+      // Verifica se a data de compensação é anterior à data atual
+      function checkCompensationDate() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const compensationDate = new Date(compensationDateInput.value);
+        
+        // Se a data de compensação é hoje ou antes, sugere mudar o status para "compensado"
+        if (compensationDate <= today && statusSelect.value === 'pending') {
+          if (confirm('A data de compensação é hoje ou já passou. Deseja alterar o status para "Compensado"?')) {
+            statusSelect.value = 'cashed';
+          }
+        }
+      }
+      
+      if (compensationDateInput && statusSelect) {
+        compensationDateInput.addEventListener('change', checkCompensationDate);
+        
+        // Verificar também ao carregar o formulário
+        checkCompensationDate();
+      }
+      
+      document.querySelector('form').addEventListener('submit', function(e) {
+        if (!valueInput.value || valueInput.value === 'R$ ' || valueInput.value === 'R$ 0,00') {
+          valueInput.value = 'R$ 0,00';
+        }
+      });
+    });
+  </script>
+{% endblock extra_js %}

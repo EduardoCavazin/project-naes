@@ -1,8 +1,8 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
-from .models import Expense, PaymentMethod
-from .forms import ExpenseForm
+from .models import Expense, PaymentMethod, Cheque, Account
+from .forms import ExpenseForm, ChequeForm
 import datetime
 import calendar
 
@@ -113,3 +113,71 @@ class PaymentMethodDelete(DeleteView):
     template_name = 'core/payment_method/confirm_delete.html'
     success_url = reverse_lazy('paymentmethod-list')
     extra_context = {'titulo': 'Excluir Método de Pagamento'}
+
+# ——— CHEQUE ———
+
+class ChequeList(ListView):
+    model = Cheque
+    template_name = 'core/cheque/list.html'
+    extra_context = {
+        'titulo': 'Lista de Cheques',
+        'create_url_name': 'cheque-create',
+        'create_button_label': 'Novo Cheque'
+    }
+
+class ChequeCreate(CreateView):
+    model = Cheque
+    form_class = ChequeForm
+    template_name = 'core/cheque/form.html'
+    success_url = reverse_lazy('cheque-list')
+    extra_context = {'titulo': 'Cadastrar Cheque'}
+    
+    def form_valid(self, form):
+        cheque = form.save(commit=False)
+        cheque.type = 'cheque'
+        
+        # Se a data de compensação já passou, marcar como compensado automaticamente
+        today = datetime.date.today()
+        if cheque.compensation_date <= today and cheque.status == 'pending':
+            cheque.status = 'cashed'
+            
+            # Opcionalmente, atualizar o saldo da conta aqui
+            # account = cheque.account
+            # account.balance -= cheque.value
+            # account.save()
+        
+        return super().form_valid(form)
+
+class ChequeUpdate(UpdateView):
+    model = Cheque
+    form_class = ChequeForm
+    template_name = 'core/cheque/form.html'
+    success_url = reverse_lazy('cheque-list')
+    extra_context = {'titulo': 'Editar Cheque'}
+    
+    def form_valid(self, form):
+        cheque = form.save(commit=False)
+        original_cheque = Cheque.objects.get(pk=cheque.pk)
+        
+        # Se o status mudou de pendente para compensado, atualizar saldo
+        if original_cheque.status == 'pending' and cheque.status == 'cashed':
+            # Opcionalmente, atualizar o saldo da conta aqui
+            # account = cheque.account
+            # account.balance -= cheque.value
+            # account.save()
+            pass  # Remova este 'pass' quando implementar a lógica acima
+        # Se o status mudou de compensado para cancelado, restaurar saldo
+        elif original_cheque.status == 'cashed' and cheque.status == 'canceled':
+            # Opcionalmente, restaurar o saldo da conta aqui
+            # account = cheque.account
+            # account.balance += cheque.value
+            # account.save()
+            pass  # Remova este 'pass' quando implementar a lógica acima
+            
+        return super().form_valid(form)
+
+class ChequeDelete(DeleteView):
+    model = Cheque
+    template_name = 'core/cheque/confirm_delete.html'
+    success_url = reverse_lazy('cheque-list')
+    extra_context = {'titulo': 'Excluir Cheque'}

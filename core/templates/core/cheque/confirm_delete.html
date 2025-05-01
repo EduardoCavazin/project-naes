@@ -1,0 +1,15 @@
+{% extends "core/models/confirm_delete_base.html" %}
+
+{% block title %}Excluir Cheque{% endblock %}
+
+{% block content %}
+  <div class="container my-5 text-center">
+    <h2>{{ titulo }}</h2>
+    <p>Tem certeza que deseja excluir o cheque <strong>{{ object.number }}</strong> no valor de <strong>R$ {{ object.value|floatformat:2 }}</strong>?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn btn-danger me-2">Excluir</button>
+      <a class="btn btn-secondary" href="javascript:history.back()">Cancelar</a>
+    </form>
+  </div>
+{% endblock %}
