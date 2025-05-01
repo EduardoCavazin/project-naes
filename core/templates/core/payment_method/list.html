@@ -1,7 +1,7 @@
 {% extends "core/models/list_base.html" %}
 {% load static %}
 
-{% block title %}Lista de Despesas{% endblock %}
+{% block title %}Lista de Métodos de Pagamento{% endblock %}
 
 {% block content %}
   <div class="container my-5">
@@ -20,11 +20,7 @@
               <tr>
                 <th>Nome</th>
                 <th>Descrição</th>
-                <th>Valor</th>
-                <th>Data</th>
-                <th>Categoria</th>
-                <th>Método</th>
-                <th>Conta</th>
+                <th>Parcelamento</th>
                 <th class="text-end">Ações</th>
               </tr>
               {% endblock %}
@@ -35,23 +31,25 @@
               <tr>
                 <td>{{ obj.name }}</td>
                 <td>{{ obj.description }}</td>
-                <td>R$ {{ obj.value|floatformat:2 }}</td>
-                <td>{{ obj.date }}</td>
-                <td>{{ obj.category.name }}</td>
-                <td>{{ obj.payment_method.name }}</td>
-                <td>{{ obj.account.identifier }}</td>
+                <td>
+                  {% if obj.supports_installments %}
+                    Até {{ obj.max_installments }}x
+                  {% else %}
+                    Não suportado
+                  {% endif %}
+                </td>
                 <td class="text-end">
-                  <a href="{% url 'expense-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
+                  <a href="{% url 'paymentmethod-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
                     <i class="fas fa-edit"></i>
                   </a>
-                  <a href="{% url 'expense-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
+                  <a href="{% url 'paymentmethod-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
                     <i class="fas fa-trash-alt"></i>
                   </a>
                 </td>
               </tr>
               {% empty %}
               <tr>
-                <td colspan="8" class="text-center py-4">Nenhuma despesa cadastrada.</td>
+                <td colspan="4" class="text-center py-4">Nenhum método de pagamento cadastrado.</td>
               </tr>
               {% endfor %}
               {% endblock %}

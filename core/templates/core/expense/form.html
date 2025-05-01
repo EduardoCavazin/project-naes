@@ -1,13 +1,19 @@
 {% extends "core/models/form_base.html" %}
 {% load crispy_forms_tags %}
 
-{% block form_title %}Cadastrar Despesa{% endblock form_title %}
+{% block form_title %}{{ titulo }}{% endblock form_title %}
 {% block form_subtitle %}
   <p class="text-muted">Informe os dados da sua despesa</p>
 {% endblock form_subtitle %}
 
 {% block form_fields %}
   {{ form|crispy }}
+  
+  <div id="installments_div" class="mb-3" style="display: none;">
+    <label for="id_installments" class="form-label">Número de Parcelas</label>
+    <input type="number" class="form-control" id="id_installments" name="installments" min="1" value="1">
+    <div class="form-text">Selecione em quantas parcelas deseja dividir esta despesa.</div>
+  </div>
 {% endblock form_fields %}
 
 {% block extra_js %}
@@ -15,7 +21,11 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       const valueInput = document.getElementById('id_value');
+      const paymentMethodSelect = document.getElementById('id_payment_method');
+      const installmentsDiv = document.getElementById('installments_div');
+      const installmentsInput = document.getElementById('id_installments');
       
+      // Formato da máscara de moeda
       if (valueInput) {
         valueInput.value = '';
       }
@@ -71,6 +81,29 @@
           valueInput.value = 'R$ 0,00';
         }
       });
+      
+      if (paymentMethodSelect) {
+        const installmentMethodsData = JSON.parse(paymentMethodSelect.getAttribute('data-installment-methods') || '{}');
+        
+        function updateInstallmentsVisibility() {
+          const selectedId = paymentMethodSelect.value;
+          if (selectedId && installmentMethodsData[selectedId] && installmentMethodsData[selectedId].supports) {
+            installmentsDiv.style.display = 'block';
+            const maxInstallments = installmentMethodsData[selectedId].max;
+            installmentsInput.max = maxInstallments;
+            if (parseInt(installmentsInput.value) > maxInstallments) {
+              installmentsInput.value = maxInstallments;
+            }
+          } else {
+            installmentsDiv.style.display = 'none';
+            installmentsInput.value = 1;
+          }
+        }
+        
+        updateInstallmentsVisibility();
+        
+        paymentMethodSelect.addEventListener('change', updateInstallmentsVisibility);
+      }
     });
   </script>
 {% endblock extra_js %}

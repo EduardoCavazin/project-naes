@@ -10,8 +10,10 @@ class Category(models.Model):
 
 
 class PaymentMethod(models.Model):
-    name        = models.CharField("Método", max_length=100)
+    name = models.CharField("Método", max_length=100)
     description = models.TextField("Descrição", blank=True)
+    supports_installments = models.BooleanField("Suporta Parcelamento", default=False)
+    max_installments = models.PositiveSmallIntegerField("Número Máximo de Parcelas", default=1)
 
     def __str__(self):
         return self.name
@@ -42,11 +44,15 @@ class Transaction(models.Model):
 
 
 class Expense(Transaction):
-    name        = models.CharField("Nome", max_length=100)
-    description    = models.CharField("Descrição", max_length=200)
-    category       = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name="Categoria")
+    name = models.CharField("Nome", max_length=100)
+    description = models.CharField("Descrição", max_length=200)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name="Categoria")
     payment_method = models.ForeignKey(PaymentMethod, on_delete=models.PROTECT, verbose_name="Método de Pagamento")
-    account        = models.ForeignKey(Account, on_delete=models.PROTECT, verbose_name="Conta")
+    account = models.ForeignKey(Account, on_delete=models.PROTECT, verbose_name="Conta")
+    installments = models.PositiveSmallIntegerField("Número de Parcelas", default=1)
+    installment_number = models.PositiveSmallIntegerField("Parcela Atual", default=1)
+    parent_expense = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, 
+                                      related_name='child_expenses', verbose_name="Despesa Original")
     
     def __str__(self):
         return self.name

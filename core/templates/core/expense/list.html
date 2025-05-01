@@ -1,0 +1,69 @@
+{% extends "core/models/list_base.html" %}
+{% load static %}
+
+{% block title %}Lista de Despesas{% endblock %}
+
+{% block content %}
+  <div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="mb-0">{{ titulo }}</h2>
+      <a href="{% url create_url_name %}" class="btn btn-primary">
+        <i class="fas fa-plus me-1"></i> {{ create_button_label }}
+      </a>
+    </div>
+    <div class="card shadow-sm card-list">
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              {% block table_headers %}
+              <tr>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Valor</th>
+                <th>Data</th>
+                <th>Categoria</th>
+                <th>Método</th>
+                <th>Conta</th>
+                <th class="text-end">Ações</th>
+              </tr>
+              {% endblock %}
+            </thead>
+            <tbody>
+              {% block table_rows %}
+              {% for obj in object_list %}
+              <tr>
+                <td>
+                  {{ obj.name }}
+                  {% if obj.installments > 1 %}
+                  <span class="badge bg-info ms-1">{{ obj.installment_number }}/{{ obj.installments }}</span>
+                  {% endif %}
+                </td>
+                <td>{{ obj.description }}</td>
+                <td>R$ {{ obj.value|floatformat:2 }}</td>
+                <td>{{ obj.date }}</td>
+                <td>{{ obj.category.name }}</td>
+                <td>{{ obj.payment_method.name }}</td>
+                <td>{{ obj.account.identifier }}</td>
+                <td class="text-end">
+                  <a href="{% url 'expense-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
+                    <i class="fas fa-edit"></i>
+                  </a>
+                  <a href="{% url 'expense-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
+                    <i class="fas fa-trash-alt"></i>
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="8" class="text-center py-4">Nenhuma despesa cadastrada.</td>
+              </tr>
+              {% endfor %}
+              {% endblock %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
