@@ -1,0 +1,76 @@
+{% extends "core/models/form_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block form_title %}Cadastrar Despesa{% endblock form_title %}
+{% block form_subtitle %}
+  <p class="text-muted">Informe os dados da sua despesa</p>
+{% endblock form_subtitle %}
+
+{% block form_fields %}
+  {{ form|crispy }}
+{% endblock form_fields %}
+
+{% block extra_js %}
+  <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/cleave.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const valueInput = document.getElementById('id_value');
+      
+      if (valueInput) {
+        valueInput.value = '';
+      }
+      
+      let currentAmount = '0';
+      
+      function updateDisplay() {
+        let intPart = currentAmount.slice(0, -2) || '0';
+        let decPart = currentAmount.slice(-2).padStart(2, '0');
+        
+        if (intPart.length > 3) {
+          intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        
+        valueInput.value = `R$ ${intPart},${decPart}`;
+      }
+      
+      updateDisplay();
+      
+      valueInput.addEventListener('keydown', function(e) {
+        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+          return;
+        }
+        
+        e.preventDefault();
+        
+        if (/^\d$/.test(e.key)) {
+          currentAmount = currentAmount + e.key;
+          currentAmount = currentAmount.replace(/^0+/, '');
+          
+          if (currentAmount === '') {
+            currentAmount = '0';
+          }
+          
+          updateDisplay();
+        }
+      });
+      
+      valueInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Backspace') {
+          currentAmount = currentAmount.slice(0, -1);
+          
+          if (currentAmount === '') {
+            currentAmount = '0';
+          }
+          
+          updateDisplay();
+        }
+      });
+      
+      document.querySelector('form').addEventListener('submit', function(e) {
+        if (!valueInput.value || valueInput.value === 'R$ ' || valueInput.value === 'R$ 0,00') {
+          valueInput.value = 'R$ 0,00';
+        }
+      });
+    });
+  </script>
+{% endblock extra_js %}

@@ -42,10 +42,14 @@ class Transaction(models.Model):
 
 
 class Expense(Transaction):
+    name        = models.CharField("Nome", max_length=100)
     description    = models.CharField("Descrição", max_length=200)
     category       = models.ForeignKey(Category, on_delete=models.PROTECT, verbose_name="Categoria")
     payment_method = models.ForeignKey(PaymentMethod, on_delete=models.PROTECT, verbose_name="Método de Pagamento")
     account        = models.ForeignKey(Account, on_delete=models.PROTECT, verbose_name="Conta")
+    
+    def __str__(self):
+        return self.name
 
 
 class Cheque(Transaction):

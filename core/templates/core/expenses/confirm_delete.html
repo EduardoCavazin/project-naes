@@ -5,7 +5,7 @@
 {% block content %}
   <div class="container my-5 text-center">
     <h2>{{ titulo }}</h2>
-    <p>Tem certeza que deseja excluir a despesa <strong>{{ object }}</strong>?</p>
+    <p>Tem certeza que deseja excluir a despesa <strong>{{ object.name }}</strong>?</p>
     <form method="post">
       {% csrf_token %}
       <button class="btn btn-danger me-2">Excluir</button>

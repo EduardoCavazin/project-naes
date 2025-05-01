@@ -1,12 +1,13 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from .models import Expense, PaymentMethod
+from .forms import ExpenseForm
 
 # ——— EXPENSE ———
 
 class ExpenseCreate(CreateView):
     model = Expense
-    fields = ['description','value','date','user','category','payment_method','account']
+    form_class = ExpenseForm
     template_name = 'core/form_expense.html'
     success_url = reverse_lazy('expense-list')
     extra_context = {'titulo': 'Cadastrar Despesa'}
@@ -22,7 +23,7 @@ class ExpenseList(ListView):
 
 class ExpenseUpdate(UpdateView):
     model = Expense
-    fields = ExpenseCreate.fields
+    form_class = ExpenseForm
     template_name = 'core/form_expense.html'
     success_url = reverse_lazy('expense-list')
     extra_context = {'titulo': 'Editar Despesa'}
