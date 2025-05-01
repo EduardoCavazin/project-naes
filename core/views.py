@@ -16,41 +16,33 @@ class ExpenseCreate(CreateView):
     extra_context = {'titulo': 'Cadastrar Despesa'}
     
     def form_valid(self, form):
-        # Obter os dados do formulário
         expense = form.save(commit=False)
         installments = form.cleaned_data.get('installments') or 1
         
-        # Verificar se o método de pagamento suporta parcelamento
         payment_method = expense.payment_method
         if not payment_method.supports_installments:
             installments = 1
         elif installments > payment_method.max_installments:
             installments = payment_method.max_installments
         
-        # Se for apenas uma parcela, salvar normalmente
         if installments == 1:
             return super().form_valid(form)
         
-        # Caso contrário, criar várias despesas
         value_per_installment = expense.value / installments
         original_date = expense.date
         
-        # Salvar a despesa original como a primeira parcela
         expense.installments = installments
         expense.installment_number = 1
         expense.value = value_per_installment
         expense.name = f"{expense.name} (1/{installments})"
         expense.save()
         
-        # Criar as demais parcelas
         for i in range(2, installments + 1):
-            # Calcular a data da parcela (um mês após a anterior)
             next_month = original_date.month + (i - 1)
             next_year = original_date.year + ((next_month - 1) // 12)
             next_month = ((next_month - 1) % 12) + 1
             next_date = datetime.date(next_year, next_month, min(original_date.day, calendar.monthrange(next_year, next_month)[1]))
             
-            # Criar uma nova despesa para esta parcela
             Expense.objects.create(
                 name=f"{expense.name.split(' (')[0]} ({i}/{installments})",
                 description=expense.description,
