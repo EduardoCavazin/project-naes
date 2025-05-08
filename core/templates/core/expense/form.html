@@ -16,94 +16,31 @@
   </div>
 {% endblock form_fields %}
 
-{% block extra_js %}
-  <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/cleave.min.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const valueInput = document.getElementById('id_value');
-      const paymentMethodSelect = document.getElementById('id_payment_method');
-      const installmentsDiv = document.getElementById('installments_div');
-      const installmentsInput = document.getElementById('id_installments');
-      
-      // Formato da máscara de moeda
-      if (valueInput) {
-        valueInput.value = '';
+{% block form_specific_js %}
+  const paymentMethodSelect = document.getElementById('id_payment_method');
+  const installmentsDiv = document.getElementById('installments_div');
+  const installmentsInput = document.getElementById('id_installments');
+  
+  if (paymentMethodSelect) {
+    const installmentMethodsData = JSON.parse(paymentMethodSelect.getAttribute('data-installment-methods') || '{}');
+    
+    function updateInstallmentsVisibility() {
+      const selectedId = paymentMethodSelect.value;
+      if (selectedId && installmentMethodsData[selectedId] && installmentMethodsData[selectedId].supports) {
+        installmentsDiv.style.display = 'block';
+        const maxInstallments = installmentMethodsData[selectedId].max;
+        installmentsInput.max = maxInstallments;
+        if (parseInt(installmentsInput.value) > maxInstallments) {
+          installmentsInput.value = maxInstallments;
+        }
+      } else {
+        installmentsDiv.style.display = 'none';
+        installmentsInput.value = 1;
       }
-      
-      let currentAmount = '0';
-      
-      function updateDisplay() {
-        let intPart = currentAmount.slice(0, -2) || '0';
-        let decPart = currentAmount.slice(-2).padStart(2, '0');
-        
-        if (intPart.length > 3) {
-          intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
-        
-        valueInput.value = `R$ ${intPart},${decPart}`;
-      }
-      
-      updateDisplay();
-      
-      valueInput.addEventListener('keydown', function(e) {
-        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
-          return;
-        }
-        
-        e.preventDefault();
-        
-        if (/^\d$/.test(e.key)) {
-          currentAmount = currentAmount + e.key;
-          currentAmount = currentAmount.replace(/^0+/, '');
-          
-          if (currentAmount === '') {
-            currentAmount = '0';
-          }
-          
-          updateDisplay();
-        }
-      });
-      
-      valueInput.addEventListener('keyup', function(e) {
-        if (e.key === 'Backspace') {
-          currentAmount = currentAmount.slice(0, -1);
-          
-          if (currentAmount === '') {
-            currentAmount = '0';
-          }
-          
-          updateDisplay();
-        }
-      });
-      
-      document.querySelector('form').addEventListener('submit', function(e) {
-        if (!valueInput.value || valueInput.value === 'R$ ' || valueInput.value === 'R$ 0,00') {
-          valueInput.value = 'R$ 0,00';
-        }
-      });
-      
-      if (paymentMethodSelect) {
-        const installmentMethodsData = JSON.parse(paymentMethodSelect.getAttribute('data-installment-methods') || '{}');
-        
-        function updateInstallmentsVisibility() {
-          const selectedId = paymentMethodSelect.value;
-          if (selectedId && installmentMethodsData[selectedId] && installmentMethodsData[selectedId].supports) {
-            installmentsDiv.style.display = 'block';
-            const maxInstallments = installmentMethodsData[selectedId].max;
-            installmentsInput.max = maxInstallments;
-            if (parseInt(installmentsInput.value) > maxInstallments) {
-              installmentsInput.value = maxInstallments;
-            }
-          } else {
-            installmentsDiv.style.display = 'none';
-            installmentsInput.value = 1;
-          }
-        }
-        
-        updateInstallmentsVisibility();
-        
-        paymentMethodSelect.addEventListener('change', updateInstallmentsVisibility);
-      }
-    });
-  </script>
-{% endblock extra_js %}
+    }
+    
+    updateInstallmentsVisibility();
+    
+    paymentMethodSelect.addEventListener('change', updateInstallmentsVisibility);
+  }
+{% endblock form_specific_js %}

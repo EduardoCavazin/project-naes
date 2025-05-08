@@ -3,70 +3,42 @@
 
 {% block title %}Lista de Cheques{% endblock %}
 
-{% block content %}
-  <div class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="mb-0">{{ titulo }}</h2>
-      <a href="{% url create_url_name %}" class="btn btn-primary">
-        <i class="fas fa-plus me-1"></i> {{ create_button_label }}
-      </a>
-    </div>
-    <div class="card shadow-sm card-list">
-      <div class="card-body p-0">
-        <div class="table-responsive">
-          <table class="table table-hover mb-0">
-            <thead class="table-light">
-              {% block table_headers %}
-              <tr>
-                <th>Número</th>
-                <th>Valor</th>
-                <th>Data de Emissão</th>
-                <th>Data de Compensação</th>
-                <th>Beneficiário</th>
-                <th>Conta</th>
-                <th>Status</th>
-                <th class="text-end">Ações</th>
-              </tr>
-              {% endblock %}
-            </thead>
-            <tbody>
-              {% block table_rows %}
-              {% for obj in object_list %}
-              <tr>
-                <td>{{ obj.number }}</td>
-                <td>R$ {{ obj.value|floatformat:2 }}</td>
-                <td>{{ obj.issue_date }}</td>
-                <td>{{ obj.compensation_date }}</td>
-                <td>{{ obj.recipient }}</td>
-                <td>{{ obj.account.identifier }}</td>
-                <td>
-                  {% if obj.status == 'pending' %}
-                    <span class="badge bg-warning">Pendente</span>
-                  {% elif obj.status == 'cashed' %}
-                    <span class="badge bg-success">Compensado</span>
-                  {% else %}
-                    <span class="badge bg-danger">Cancelado</span>
-                  {% endif %}
-                </td>
-                <td class="text-end">
-                  <a href="{% url 'cheque-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
-                    <i class="fas fa-edit"></i>
-                  </a>
-                  <a href="{% url 'cheque-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
-                    <i class="fas fa-trash-alt"></i>
-                  </a>
-                </td>
-              </tr>
-              {% empty %}
-              <tr>
-                <td colspan="8" class="text-center py-4">Nenhum cheque cadastrado.</td>
-              </tr>
-              {% endfor %}
-              {% endblock %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
+{% block table_headers %}
+  <th>Número</th>
+  <th>Valor</th>
+  <th>Data de Emissão</th>
+  <th>Data de Compensação</th>
+  <th>Beneficiário</th>
+  <th>Conta</th>
+  <th>Status</th>
+  <th class="text-end">Ações</th>
 {% endblock %}
+
+{% block table_row %}
+  <td>{{ obj.number }}</td>
+  <td>R$ {{ obj.value|floatformat:2 }}</td>
+  <td>{{ obj.issue_date }}</td>
+  <td>{{ obj.compensation_date }}</td>
+  <td>{{ obj.recipient }}</td>
+  <td>{{ obj.account.identifier }}</td>
+  <td>
+    {% if obj.status == 'pending' %}
+      <span class="badge bg-warning">Pendente</span>
+    {% elif obj.status == 'cashed' %}
+      <span class="badge bg-success">Compensado</span>
+    {% else %}
+      <span class="badge bg-danger">Cancelado</span>
+    {% endif %}
+  </td>
+  <td class="text-end">
+    <a href="{% url 'cheque-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
+      <i class="fas fa-edit"></i>
+    </a>
+    <a href="{% url 'cheque-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
+      <i class="fas fa-trash-alt"></i>
+    </a>
+  </td>
+{% endblock %}
+
+{% block empty_colspan %}8{% endblock %}
+{% block empty_message %}Nenhum cheque cadastrado.{% endblock %}

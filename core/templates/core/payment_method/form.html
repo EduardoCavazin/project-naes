@@ -10,23 +10,19 @@
   {{ form|crispy }}
 {% endblock form_fields %}
 
-{% block extra_js %}
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const supportsInstallmentsField = document.getElementById('id_supports_installments');
-    const maxInstallmentsField = document.getElementById('id_max_installments');
-    
-    function updateMaxInstallmentsVisibility() {
-      if (supportsInstallmentsField.checked) {
-        maxInstallmentsField.parentElement.style.display = 'block';
-      } else {
-        maxInstallmentsField.parentElement.style.display = 'none';
-      }
+{% block form_specific_js %}
+  const supportsInstallmentsField = document.getElementById('id_supports_installments');
+  const maxInstallmentsField = document.getElementById('id_max_installments');
+  
+  function updateMaxInstallmentsVisibility() {
+    if (supportsInstallmentsField.checked) {
+      maxInstallmentsField.parentElement.style.display = 'block';
+    } else {
+      maxInstallmentsField.parentElement.style.display = 'none';
     }
-    
-    updateMaxInstallmentsVisibility();
-    
-    supportsInstallmentsField.addEventListener('change', updateMaxInstallmentsVisibility);
-  });
-</script>
-{% endblock extra_js %}
+  }
+  
+  updateMaxInstallmentsVisibility();
+  
+  supportsInstallmentsField.addEventListener('change', updateMaxInstallmentsVisibility);
+{% endblock form_specific_js %}
