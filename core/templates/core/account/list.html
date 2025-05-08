@@ -1,0 +1,32 @@
+{% extends "core/models/list_base.html" %}
+{% load static %}
+
+{% block title %}Lista de Contas{% endblock %}
+
+{% block table_headers %}
+  <th>Identificador</th>
+  <th>Saldo</th>
+  <th class="text-end">Ações</th>
+{% endblock %}
+
+{% block table_row %}
+  <td>{{ obj.identifier }}</td>
+  <td>
+    {% if obj.balance >= 0 %}
+      <span class="text-success">R$ {{ obj.balance|floatformat:2 }}</span>
+    {% else %}
+      <span class="text-danger">R$ {{ obj.balance|floatformat:2 }}</span>
+    {% endif %}
+  </td>
+  <td class="text-end">
+    <a href="{% url 'account-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
+      <i class="fas fa-edit"></i>
+    </a>
+    <a href="{% url 'account-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
+      <i class="fas fa-trash-alt"></i>
+    </a>
+  </td>
+{% endblock %}
+
+{% block empty_colspan %}3{% endblock %}
+{% block empty_message %}Nenhuma conta cadastrada.{% endblock %}

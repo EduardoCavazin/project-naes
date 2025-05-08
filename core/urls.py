@@ -3,7 +3,8 @@ from .views import (
     ExpenseCreate, ExpenseList, ExpenseUpdate, ExpenseDelete,
     PaymentMethodList, PaymentMethodCreate, PaymentMethodUpdate, PaymentMethodDelete,
     ChequeList, ChequeCreate, ChequeUpdate, ChequeDelete,
-    # repita para Category, Account…
+    CategoryList, CategoryCreate, CategoryUpdate, CategoryDelete,
+    AccountList, AccountCreate, AccountUpdate, AccountDelete,
 )
 
 urlpatterns = [
@@ -19,9 +20,20 @@ urlpatterns = [
     path('metodos/<int:pk>/editar/', PaymentMethodUpdate.as_view(), name='paymentmethod-update'),
     path('metodos/<int:pk>/excluir/', PaymentMethodDelete.as_view(), name='paymentmethod-delete'),
     
-    #Cheques
-    path('cheques/',                ChequeList.as_view(),    name='cheque-list'),
+    #Cheques    path('cheques/',                ChequeList.as_view(),    name='cheque-list'),
     path('cheques/novo/',           ChequeCreate.as_view(),  name='cheque-create'),
     path('cheques/<int:pk>/editar/', ChequeUpdate.as_view(), name='cheque-update'),
     path('cheques/<int:pk>/excluir/', ChequeDelete.as_view(), name='cheque-delete'),
+    
+    #Categorias
+    path('categorias/',                CategoryList.as_view(),    name='category-list'),
+    path('categorias/nova/',           CategoryCreate.as_view(),  name='category-create'),
+    path('categorias/<int:pk>/editar/', CategoryUpdate.as_view(), name='category-update'),
+    path('categorias/<int:pk>/excluir/', CategoryDelete.as_view(), name='category-delete'),
+    
+    #Contas
+    path('contas/',                AccountList.as_view(),    name='account-list'),
+    path('contas/nova/',           AccountCreate.as_view(),  name='account-create'),
+    path('contas/<int:pk>/editar/', AccountUpdate.as_view(), name='account-update'),
+    path('contas/<int:pk>/excluir/', AccountDelete.as_view(), name='account-delete'),
 ]

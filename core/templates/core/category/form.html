@@ -1,0 +1,11 @@
+{% extends "core/models/form_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block form_title %}{{ titulo }}{% endblock form_title %}
+{% block form_subtitle %}
+  <p class="text-muted">Informe os dados da categoria</p>
+{% endblock form_subtitle %}
+
+{% block form_fields %}
+  {{ form|crispy }}
+{% endblock form_fields %}

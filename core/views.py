@@ -1,7 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
-from .models import Expense, PaymentMethod, Cheque, Account
+from .models import Expense, PaymentMethod, Cheque, Account, Category
 from .forms import ExpenseForm, ChequeForm
 import datetime
 import calendar
@@ -181,3 +181,82 @@ class ChequeDelete(DeleteView):
     template_name = 'core/cheque/confirm_delete.html'
     success_url = reverse_lazy('cheque-list')
     extra_context = {'titulo': 'Excluir Cheque'}
+
+# ——— CATEGORY ———
+
+class CategoryList(ListView):
+    model = Category
+    template_name = 'core/category/list.html'
+    extra_context = {
+        'titulo': 'Lista de Categorias',
+        'create_url_name': 'category-create',
+        'create_button_label': 'Nova Categoria'
+    }
+
+class CategoryCreate(CreateView):
+    model = Category
+    fields = ['name', 'description']
+    template_name = 'core/category/form.html'
+    success_url = reverse_lazy('category-list')
+    extra_context = {'titulo': 'Cadastrar Categoria'}
+
+class CategoryUpdate(UpdateView):
+    model = Category
+    fields = ['name', 'description']
+    template_name = 'core/category/form.html'
+    success_url = reverse_lazy('category-list')
+    extra_context = {'titulo': 'Editar Categoria'}
+
+class CategoryDelete(DeleteView):
+    model = Category
+    template_name = 'core/category/confirm_delete.html'
+    success_url = reverse_lazy('category-list')
+    extra_context = {'titulo': 'Excluir Categoria'}
+
+# ——— ACCOUNT ———
+
+class AccountList(ListView):
+    model = Account
+    template_name = 'core/account/list.html'
+    extra_context = {
+        'titulo': 'Lista de Contas',
+        'create_url_name': 'account-create',
+        'create_button_label': 'Nova Conta'
+    }
+    
+    def get_queryset(self):
+        # Filtrar apenas contas do usuário atual
+        return Account.objects.filter(user=self.request.user)
+
+class AccountCreate(CreateView):
+    model = Account
+    fields = ['identifier', 'balance']
+    template_name = 'core/account/form.html'
+    success_url = reverse_lazy('account-list')
+    extra_context = {'titulo': 'Cadastrar Conta'}
+    
+    def form_valid(self, form):
+        account = form.save(commit=False)
+        account.user = self.request.user
+        return super().form_valid(form)
+
+class AccountUpdate(UpdateView):
+    model = Account
+    fields = ['identifier', 'balance']
+    template_name = 'core/account/form.html'
+    success_url = reverse_lazy('account-list')
+    extra_context = {'titulo': 'Editar Conta'}
+    
+    def get_queryset(self):
+        # Garantir que usuários só possam editar suas próprias contas
+        return Account.objects.filter(user=self.request.user)
+
+class AccountDelete(DeleteView):
+    model = Account
+    template_name = 'core/account/confirm_delete.html'
+    success_url = reverse_lazy('account-list')
+    extra_context = {'titulo': 'Excluir Conta'}
+    
+    def get_queryset(self):
+        # Garantir que usuários só possam excluir suas próprias contas
+        return Account.objects.filter(user=self.request.user)
