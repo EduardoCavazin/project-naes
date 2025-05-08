@@ -2,14 +2,21 @@
 
 {% block title %}Excluir Método de Pagamento{% endblock %}
 
-{% block content %}
-  <div class="container my-5 text-center">
-    <h2>{{ titulo }}</h2>
-    <p>Tem certeza que deseja excluir o método de pagamento <strong>{{ object.name }}</strong>?</p>
-    <form method="post">
-      {% csrf_token %}
-      <button class="btn btn-danger me-2">Excluir</button>
-      <a class="btn btn-secondary" href="javascript:history.back()">Cancelar</a>
-    </form>
+{% block confirmation_message %}
+  Tem certeza que deseja excluir este método de pagamento?
+{% endblock %}
+
+{% block object_details %}
+  <div><strong>Nome:</strong> {{ object.name }}</div>
+  <div><strong>Descrição:</strong> {{ object.description }}</div>
+  <div>
+    <strong>Parcelamento:</strong> 
+    {% if object.supports_installments %}
+      Suporta até {{ object.max_installments }} parcelas
+    {% else %}
+      Não suporta parcelamento
+    {% endif %}
   </div>
 {% endblock %}
+
+{% block cancel_url %}{% url 'paymentmethod-list' %}{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "core/models/confirm_delete_base.html" %}
+
+{% block title %}Excluir Categoria{% endblock %}
+
+{% block confirmation_message %}
+  Tem certeza que deseja excluir esta categoria?
+{% endblock %}
+
+{% block object_details %}
+  <div><strong>Nome:</strong> {{ object.name }}</div>
+  <div><strong>Descrição:</strong> {{ object.description }}</div>
+{% endblock %}
+
+{% block cancel_url %}{% url 'category-list' %}{% endblock %}
