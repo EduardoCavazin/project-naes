@@ -20,7 +20,8 @@ urlpatterns = [
     path('metodos/<int:pk>/editar/', PaymentMethodUpdate.as_view(), name='paymentmethod-update'),
     path('metodos/<int:pk>/excluir/', PaymentMethodDelete.as_view(), name='paymentmethod-delete'),
     
-    #Cheques    path('cheques/',                ChequeList.as_view(),    name='cheque-list'),
+    #Cheques
+    path('cheques/',                ChequeList.as_view(),    name='cheque-list'),
     path('cheques/novo/',           ChequeCreate.as_view(),  name='cheque-create'),
     path('cheques/<int:pk>/editar/', ChequeUpdate.as_view(), name='cheque-update'),
     path('cheques/<int:pk>/excluir/', ChequeDelete.as_view(), name='cheque-delete'),

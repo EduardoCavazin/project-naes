@@ -22,24 +22,81 @@
 <div class="container my-5">
   <h2>Visão Geral do Projeto</h2>
   <p>
-    Este projeto tem como objetivo desenvolver uma aplicação Assistente Financeiro utilizando Django. O sistema gerenciará despesas, cheques, contas e transações,
-    proporcionando uma interface amigável e um design moderno.
+    O Assistente Financeiro é uma aplicação web desenvolvida com Django que permite o gerenciamento completo das suas finanças pessoais.
+    Com uma interface moderna e intuitiva, o sistema oferece ferramentas para controle de despesas, cheques, contas bancárias e categorias
+    financeiras, além de dashboards visuais para acompanhamento dos seus gastos.
   </p>
+  
+  <h3>Principais Funcionalidades</h3>
+  <div class="row mb-4">
+    <div class="col-md-6">
+      <ul class="list-group">
+        <li class="list-group-item">Gerenciamento de despesas com suporte a parcelamento</li>
+        <li class="list-group-item">Controle de cheques com status (pendente, compensado, cancelado)</li>
+        <li class="list-group-item">Cadastro e gerenciamento de métodos de pagamento</li>
+        <li class="list-group-item">Organização de despesas por categorias personalizáveis</li>
+      </ul>
+    </div>
+    <div class="col-md-6">
+      <ul class="list-group">
+        <li class="list-group-item">Administração de múltiplas contas financeiras</li>
+        <li class="list-group-item">Dashboard com resumo financeiro e gráficos</li>
+        <li class="list-group-item">Visualização de gastos mensais e distribuição por categoria</li>
+        <li class="list-group-item">Design responsivo para acesso em qualquer dispositivo</li>
+      </ul>
+    </div>
+  </div>
   
   <h3>Diagrama de Caso de Uso</h3>
   <p>
-    O diagrama abaixo ilustra as principais funcionalidades e os atores envolvidos:
+    O diagrama abaixo ilustra as principais funcionalidades e interações do usuário com o sistema:
   </p>
-  <img src="{% static 'assets/diagrams/Diagrama Caso de Uso NAES.png' %}" alt="Diagrama de Caso de Uso" class="img-fluid mb-5">
+  <img src="{% static 'assets/diagrams/Diagrama de Caso de Uso NAES.png' %}" alt="Diagrama de Caso de Uso" class="img-fluid mb-5">
 
   <h3>Diagrama de Classes</h3>
   <p>
-    O diagrama a seguir mostra as classes principais e os seus relacionamentos:
+    O diagrama a seguir mostra as principais entidades do sistema e seus relacionamentos:
   </p>
-  <img src="{% static 'assets/diagrams/Diagrama Classe NAES.png' %}" alt="Diagrama de Classes" class="img-fluid mb-5">
+  <img src="{% static 'assets/diagrams/Diagrama de Classes NAES.png' %}" alt="Diagrama de Classes" class="img-fluid mb-5">
 
-  <p>
-    Essa documentação ajuda a esclarecer a estrutura geral e as decisões de design aplicadas durante o desenvolvimento do projeto.
-  </p>
+  <h3>Tecnologias Utilizadas</h3>
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Backend</h5>
+          <ul class="card-text">
+            <li>Django Framework</li>
+            <li>SQLite/PostgreSQL</li>
+            <li>Python</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Frontend</h5>
+          <ul class="card-text">
+            <li>Bootstrap 5</li>
+            <li>JavaScript</li>
+            <li>Chart.js</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Ferramentas</h5>
+          <ul class="card-text">
+            <li>Git/GitHub</li>
+            <li>Visual Studio Code</li>
+            <li>PlantUML</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 {% endblock content %}

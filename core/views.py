@@ -224,32 +224,25 @@ class AccountList(ListView):
         'create_button_label': 'Nova Conta'
     }
     
-    def get_queryset(self):
-        # Filtrar apenas contas do usuário atual
-        return Account.objects.filter(user=self.request.user)
+    # Sem filtro por usuário - mostra todas as contas
 
 class AccountCreate(CreateView):
     model = Account
-    fields = ['identifier', 'balance']
+    fields = ['identifier', 'balance', 'user']  # Adicionado 'user' ao formulário
     template_name = 'core/account/form.html'
     success_url = reverse_lazy('account-list')
     extra_context = {'titulo': 'Cadastrar Conta'}
     
-    def form_valid(self, form):
-        account = form.save(commit=False)
-        account.user = self.request.user
-        return super().form_valid(form)
+    # Sem override do form_valid - permite selecionar qualquer usuário
 
 class AccountUpdate(UpdateView):
     model = Account
-    fields = ['identifier', 'balance']
+    fields = ['identifier', 'balance', 'user']  # Adicionado 'user' ao formulário
     template_name = 'core/account/form.html'
     success_url = reverse_lazy('account-list')
     extra_context = {'titulo': 'Editar Conta'}
     
-    def get_queryset(self):
-        # Garantir que usuários só possam editar suas próprias contas
-        return Account.objects.filter(user=self.request.user)
+    # Sem get_queryset override - permite editar qualquer conta
 
 class AccountDelete(DeleteView):
     model = Account
@@ -257,6 +250,4 @@ class AccountDelete(DeleteView):
     success_url = reverse_lazy('account-list')
     extra_context = {'titulo': 'Excluir Conta'}
     
-    def get_queryset(self):
-        # Garantir que usuários só possam excluir suas próprias contas
-        return Account.objects.filter(user=self.request.user)
+    # Sem get_queryset override - permite excluir qualquer conta

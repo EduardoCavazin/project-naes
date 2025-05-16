@@ -30,24 +30,15 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" 
               aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         Menu <i class="fas fa-bars"></i>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarResponsive">
+      </button>      <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ms-auto py-4 py-lg-0">
           <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'expense-list' %}">Despesas</a></li>
-          <li class="nav-item">
-            <a href="#"
-               class="nav-link"
-               onclick="
-                 if (!confirm('Você é o admin?')) return false;
-                 if (!confirm('Você não tá mentindo pra mim né?')) return false;
-                 window.location.href = '{% url "paymentmethod-list" %}';
-                 return false;
-               ">
-              Métodos de Pagamento
-            </a>
-          </li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'category-list' %}">Categorias</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'account-list' %}">Contas</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'cheque-list' %}">Cheques</a></li>
+          <li class="nav-item"><a class="nav-link" href="{% url 'paymentmethod-list' %}">Métodos de Pagamento</a></li>
           {% comment %} <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li> {% endcomment %}
         </ul>
       </div>
