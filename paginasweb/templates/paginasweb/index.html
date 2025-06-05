@@ -1,0 +1,156 @@
+{% extends "paginasweb/models/base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - Assistente Financeiro{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'js/charts/area_chart.js' %}"></script>
+<script src="{% static 'js/charts/pie_chart.js' %}"></script>
+<script src="{% static 'js/dashboard.js' %}"></script>
+{% endblock extra_head %}
+
+{% block header %}
+<header class="masthead" style="background-image: url('{% static "assets/img/home-bg.jpg" %}')">
+    <div class="container position-relative px-4 px-lg-5">
+        <div class="row gx-4 gx-lg-5 justify-content-center">
+            <div class="col-md-10 col-lg-8 col-xl-7">
+                <div class="site-heading">
+                    <h1>Olá!</h1>
+                    <span class="subheading">Bem-vindo ao Assistente Financeiro</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+{% endblock header %}
+
+{% block content %}
+<div class="container px-4 px-lg-5 my-5">
+    <!-- Botões de navegação -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h2 class="mb-4">Acesso Rápido</h2>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="{% url 'expense-list' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-money-bill-wave me-2"></i>Despesas
+                </a>
+                <a href="{% url 'category-list' %}" class="btn btn-success btn-lg">
+                    <i class="fas fa-tags me-2"></i>Categorias
+                </a>
+                <a href="{% url 'account-list' %}" class="btn btn-info btn-lg text-white">
+                    <i class="fas fa-piggy-bank me-2"></i>Contas
+                </a>
+                <a href="{% url 'cheque-list' %}" class="btn btn-warning btn-lg">
+                    <i class="fas fa-money-check me-2"></i>Cheques
+                </a>
+                <a href="{% url 'paymentmethod-list' %}" class="btn btn-secondary btn-lg">
+                    <i class="fas fa-credit-card me-2"></i>Métodos de Pagamento
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="mb-4">Resumo dos Gastos</h2><div class="row">
+        <!-- Card para Total Expenses -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-primary text-white shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-uppercase mb-1">Total Despesas</div>
+                            <div class="h5 mb-0 fw-bold">R$ {{ total_expenses|floatformat:2 }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card para categorias -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-success text-white shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-uppercase mb-1">Categorias</div>
+                            <div class="h5 mb-0 fw-bold">{{ total_categories }} Categorias</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-tags fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card para contas -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-info text-white shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-uppercase mb-1">Contas</div>
+                            <div class="h5 mb-0 fw-bold">{{ total_accounts }} Contas</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-piggy-bank fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card para cheques -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card bg-warning text-white shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col me-2">
+                            <div class="text-xs fw-bold text-uppercase mb-1">Cheques Pendentes</div>
+                            <div class="h5 mb-0 fw-bold">{{ total_pending_cheques }} Cheques</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-money-check fa-2x"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    <!-- Gráficos de exemplo -->
+    <div id="chart-container" 
+         data-monthly-data="{{ monthly_expenses_data|safe }}"
+         data-category-labels="{{ category_labels|safe }}"
+         data-category-data="{{ category_data|safe }}">
+        <div class="row mt-5">
+            <div class="col-lg-8">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                        <h6 class="m-0 font-weight-bold text-primary">Despesas Mensais</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-area">
+                            <canvas id="myAreaChart" width="100%" height="40"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3">
+                        <h6 class="m-0 font-weight-bold text-primary">Distribuição por Categoria</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-pie pt-4 pb-2">
+                            <canvas id="myPieChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

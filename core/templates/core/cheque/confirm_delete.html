@@ -1,0 +1,17 @@
+{% extends "core/models/confirm_delete_base.html" %}
+
+{% block title %}Excluir Cheque{% endblock %}
+
+{% block confirmation_message %}
+  Tem certeza que deseja excluir este cheque?
+{% endblock %}
+
+{% block object_details %}
+  <div><strong>Número:</strong> {{ object.number }}</div>
+  <div><strong>Valor:</strong> R$ {{ object.value|floatformat:2 }}</div>
+  <div><strong>Beneficiário:</strong> {{ object.recipient }}</div>
+  <div><strong>Data de Compensação:</strong> {{ object.compensation_date }}</div>
+  <div><strong>Status:</strong> {{ object.get_status_display }}</div>
+{% endblock %}
+
+{% block cancel_url %}{% url 'cheque-list' %}{% endblock %}

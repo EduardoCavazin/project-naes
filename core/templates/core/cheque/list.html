@@ -1,0 +1,44 @@
+{% extends "core/models/list_base.html" %}
+{% load static %}
+
+{% block title %}Lista de Cheques{% endblock %}
+
+{% block table_headers %}
+  <th>Número</th>
+  <th>Valor</th>
+  <th>Data de Emissão</th>
+  <th>Data de Compensação</th>
+  <th>Beneficiário</th>
+  <th>Conta</th>
+  <th>Status</th>
+  <th class="text-end">Ações</th>
+{% endblock %}
+
+{% block table_row %}
+  <td>{{ obj.number }}</td>
+  <td>R$ {{ obj.value|floatformat:2 }}</td>
+  <td>{{ obj.issue_date }}</td>
+  <td>{{ obj.compensation_date }}</td>
+  <td>{{ obj.recipient }}</td>
+  <td>{{ obj.account.identifier }}</td>
+  <td>
+    {% if obj.status == 'pending' %}
+      <span class="badge bg-warning">Pendente</span>
+    {% elif obj.status == 'cashed' %}
+      <span class="badge bg-success">Compensado</span>
+    {% else %}
+      <span class="badge bg-danger">Cancelado</span>
+    {% endif %}
+  </td>
+  <td class="text-end">
+    <a href="{% url 'cheque-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
+      <i class="fas fa-edit"></i>
+    </a>
+    <a href="{% url 'cheque-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
+      <i class="fas fa-trash-alt"></i>
+    </a>
+  </td>
+{% endblock %}
+
+{% block empty_colspan %}8{% endblock %}
+{% block empty_message %}Nenhum cheque cadastrado.{% endblock %}

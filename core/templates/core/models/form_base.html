@@ -1,0 +1,107 @@
+{% extends "paginasweb/models/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+{% block specific_head %}{% endblock specific_head %}
+{% endblock extra_head %}
+
+{% block header %}
+<div class="container mt-5 text-center">
+  <h2 class="display-6 fw-bold text-gradient">{% block form_title %}{% endblock form_title %}</h2>
+  {% block form_subtitle %}{% endblock form_subtitle %}
+</div>
+{% endblock header %}
+
+{% block content %}
+<div class="container my-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <form method="post" novalidate>
+            {% csrf_token %}
+            {% block form_fields %}{% endblock form_fields %}
+            <div class="d-flex justify-content-end mt-4">
+              <button type="submit" class="btn btn-primary me-2">
+                <i class="fas fa-save me-1"></i> Salvar
+              </button>
+              <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Voltar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/cleave.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Formatação monetária comum
+    const valueInput = document.getElementById('id_value');
+    
+    if (valueInput) {
+      valueInput.value = '';
+      
+      let currentAmount = '0';
+      
+      function updateDisplay() {
+        let intPart = currentAmount.slice(0, -2) || '0';
+        let decPart = currentAmount.slice(-2).padStart(2, '0');
+        
+        if (intPart.length > 3) {
+          intPart = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        
+        valueInput.value = `R$ ${intPart},${decPart}`;
+      }
+      
+      updateDisplay();
+      
+      valueInput.addEventListener('keydown', function(e) {
+        if (['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) {
+          return;
+        }
+        
+        e.preventDefault();
+        
+        if (/^\d$/.test(e.key)) {
+          currentAmount = currentAmount + e.key;
+          currentAmount = currentAmount.replace(/^0+/, '');
+          
+          if (currentAmount === '') {
+            currentAmount = '0';
+          }
+          
+          updateDisplay();
+        }
+      });
+      
+      valueInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Backspace') {
+          currentAmount = currentAmount.slice(0, -1);
+          
+          if (currentAmount === '') {
+            currentAmount = '0';
+          }
+          
+          updateDisplay();
+        }
+      });
+      
+      document.querySelector('form').addEventListener('submit', function(e) {
+        if (!valueInput.value || valueInput.value === 'R$ ' || valueInput.value === 'R$ 0,00') {
+          valueInput.value = 'R$ 0,00';
+        }
+      });
+    }
+    
+    {% block form_specific_js %}{% endblock form_specific_js %}
+  });
+</script>
+{% endblock extra_js %}

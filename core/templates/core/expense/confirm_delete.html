@@ -1,0 +1,20 @@
+{% extends "core/models/confirm_delete_base.html" %}
+
+{% block title %}Excluir Despesa{% endblock %}
+
+{% block confirmation_message %}
+  Tem certeza que deseja excluir esta despesa?
+{% endblock %}
+
+{% block object_details %}
+  <div><strong>Nome:</strong> {{ object.name }}</div>
+  <div><strong>Descrição:</strong> {{ object.description }}</div>
+  <div><strong>Valor:</strong> R$ {{ object.value|floatformat:2 }}</div>
+  <div><strong>Data:</strong> {{ object.date }}</div>
+  <div><strong>Categoria:</strong> {{ object.category.name }}</div>
+  {% if object.installments > 1 %}
+  <div><strong>Parcela:</strong> {{ object.installment_number }}/{{ object.installments }}</div>
+  {% endif %}
+{% endblock %}
+
+{% block cancel_url %}{% url 'expense-list' %}{% endblock %}

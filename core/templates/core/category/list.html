@@ -1,0 +1,26 @@
+{% extends "core/models/list_base.html" %}
+{% load static %}
+
+{% block title %}Lista de Categorias{% endblock %}
+
+{% block table_headers %}
+  <th>Nome</th>
+  <th>Descrição</th>
+  <th class="text-end">Ações</th>
+{% endblock %}
+
+{% block table_row %}
+  <td>{{ obj.name }}</td>
+  <td>{{ obj.description|truncatechars:50 }}</td>
+  <td class="text-end">
+    <a href="{% url 'category-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
+      <i class="fas fa-edit"></i>
+    </a>
+    <a href="{% url 'category-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
+      <i class="fas fa-trash-alt"></i>
+    </a>
+  </td>
+{% endblock %}
+
+{% block empty_colspan %}3{% endblock %}
+{% block empty_message %}Nenhuma categoria cadastrada.{% endblock %}

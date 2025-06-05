@@ -1,0 +1,22 @@
+{% extends "core/models/confirm_delete_base.html" %}
+
+{% block title %}Excluir Método de Pagamento{% endblock %}
+
+{% block confirmation_message %}
+  Tem certeza que deseja excluir este método de pagamento?
+{% endblock %}
+
+{% block object_details %}
+  <div><strong>Nome:</strong> {{ object.name }}</div>
+  <div><strong>Descrição:</strong> {{ object.description }}</div>
+  <div>
+    <strong>Parcelamento:</strong> 
+    {% if object.supports_installments %}
+      Suporta até {{ object.max_installments }} parcelas
+    {% else %}
+      Não suporta parcelamento
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block cancel_url %}{% url 'paymentmethod-list' %}{% endblock %}

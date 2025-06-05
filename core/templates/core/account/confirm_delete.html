@@ -1,0 +1,21 @@
+{% extends "core/models/confirm_delete_base.html" %}
+
+{% block title %}Excluir Conta{% endblock %}
+
+{% block confirmation_message %}
+  Tem certeza que deseja excluir esta conta?
+{% endblock %}
+
+{% block object_details %}
+  <div><strong>Identificador:</strong> {{ object.identifier }}</div>
+  <div>
+    <strong>Saldo:</strong> 
+    {% if object.balance >= 0 %}
+      <span class="text-success">R$ {{ object.balance|floatformat:2 }}</span>
+    {% else %}
+      <span class="text-danger">R$ {{ object.balance|floatformat:2 }}</span>
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block cancel_url %}{% url 'account-list' %}{% endblock %}
