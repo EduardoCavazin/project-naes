@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     
     'paginasweb',     #app de views/templates
     'core',           #app de domínio
+    'user.apps.UserConfig',  #app de usuário
 ]
 
 MIDDLEWARE = [
@@ -129,3 +130,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+#Configurações de autenticação
+LOGIN_REDIRECT_URL = "index"
+LOGOUT_REDIRECT_URL = "index"
+LOGIN_URL = "login"

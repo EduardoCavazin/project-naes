@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
 from .models import Expense, PaymentMethod, Cheque, Account, Category
 from .forms import ExpenseForm, ChequeForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 import datetime
 import calendar
 
@@ -251,3 +252,4 @@ class AccountDelete(DeleteView):
     extra_context = {'titulo': 'Excluir Conta'}
     
     # Sem get_queryset override - permite excluir qualquer conta
+    
