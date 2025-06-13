@@ -9,7 +9,7 @@ import calendar
 
 # ——— EXPENSE ———
 
-class ExpenseCreate(CreateView):
+class ExpenseCreate(LoginRequiredMixin, CreateView):
     model = Expense
     form_class = ExpenseForm
     template_name = 'core/expense/form.html'
@@ -18,6 +18,8 @@ class ExpenseCreate(CreateView):
     
     def form_valid(self, form):
         expense = form.save(commit=False)
+        expense.user = self.request.user  # Atribuir usuário automaticamente
+        
         installments = form.cleaned_data.get('installments') or 1
         
         payment_method = expense.payment_method
@@ -61,7 +63,7 @@ class ExpenseCreate(CreateView):
         
         return HttpResponseRedirect(self.success_url)
 
-class ExpenseList(ListView):
+class ExpenseList(LoginRequiredMixin, ListView):
     model = Expense
     template_name = 'core/expense/list.html'
     extra_context = {
@@ -69,64 +71,35 @@ class ExpenseList(ListView):
     'create_url_name': 'expense-create',
     'create_button_label': 'Nova Despesa'
     }
+    
+    def get_queryset(self):
+        # Mostrar apenas despesas do usuário logado
+        return Expense.objects.filter(user=self.request.user)
 
-class ExpenseUpdate(UpdateView):
+class ExpenseUpdate(LoginRequiredMixin, UpdateView):
     model = Expense
     form_class = ExpenseForm
     template_name = 'core/expense/form.html'
     success_url = reverse_lazy('expense-list')
     extra_context = {'titulo': 'Editar Despesa'}
+    
+    def get_queryset(self):
+        # Permitir editar apenas despesas do usuário logado
+        return Expense.objects.filter(user=self.request.user)
 
-class ExpenseDelete(DeleteView):
+class ExpenseDelete(LoginRequiredMixin, DeleteView):
     model = Expense
     template_name = 'core/expense/confirm_delete.html'
     success_url = reverse_lazy('expense-list')
     extra_context = {'titulo': 'Excluir Despesa'}
-
-
-# ——— PAYMENT METHOD ———
-
-class PaymentMethodList(ListView):
-    model = PaymentMethod
-    template_name = 'core/payment_method/list.html'
-    extra_context = {
-        'titulo': 'Lista de Métodos de Pagamento',
-        'create_url_name': 'paymentmethod-create',
-        'create_button_label': 'Novo Método'
-    }
-
-class PaymentMethodCreate(CreateView):
-    model = PaymentMethod
-    fields = ['name', 'description', 'supports_installments', 'max_installments']
-    template_name = 'core/payment_method/form.html'
-    success_url = reverse_lazy('paymentmethod-list')
-    extra_context = {'titulo': 'Cadastrar Método de Pagamento'}
-
-class PaymentMethodUpdate(UpdateView):
-    model = PaymentMethod
-    fields = ['name', 'description', 'supports_installments', 'max_installments']
-    template_name = 'core/payment_method/form.html'
-    success_url = reverse_lazy('paymentmethod-list')
-    extra_context = {'titulo': 'Editar Método de Pagamento'}
-
-class PaymentMethodDelete(DeleteView):
-    model = PaymentMethod
-    template_name = 'core/payment_method/confirm_delete.html'
-    success_url = reverse_lazy('paymentmethod-list')
-    extra_context = {'titulo': 'Excluir Método de Pagamento'}
+    
+    def get_queryset(self):
+        # Permitir excluir apenas despesas do usuário logado
+        return Expense.objects.filter(user=self.request.user)
 
 # ——— CHEQUE ———
 
-class ChequeList(ListView):
-    model = Cheque
-    template_name = 'core/cheque/list.html'
-    extra_context = {
-        'titulo': 'Lista de Cheques',
-        'create_url_name': 'cheque-create',
-        'create_button_label': 'Novo Cheque'
-    }
-
-class ChequeCreate(CreateView):
+class ChequeCreate(LoginRequiredMixin, CreateView):
     model = Cheque
     form_class = ChequeForm
     template_name = 'core/cheque/form.html'
@@ -135,57 +108,84 @@ class ChequeCreate(CreateView):
     
     def form_valid(self, form):
         cheque = form.save(commit=False)
-        cheque.type = 'cheque'
-        
-        # Se a data de compensação já passou, marcar como compensado automaticamente
-        today = datetime.date.today()
-        if cheque.compensation_date <= today and cheque.status == 'pending':
-            cheque.status = 'cashed'
-            
-            # Opcionalmente, atualizar o saldo da conta aqui
-            # account = cheque.account
-            # account.balance -= cheque.value
-            # account.save()
-        
+        cheque.user = self.request.user  # Atribuir usuário automaticamente
         return super().form_valid(form)
 
-class ChequeUpdate(UpdateView):
+class ChequeList(LoginRequiredMixin, ListView):
+    model = Cheque
+    template_name = 'core/cheque/list.html'
+    extra_context = {
+        'titulo': 'Lista de Cheques',
+        'create_url_name': 'cheque-create',
+        'create_button_label': 'Novo Cheque'
+    }
+    
+    def get_queryset(self):
+        # Mostrar apenas cheques do usuário logado
+        return Cheque.objects.filter(user=self.request.user)
+
+class ChequeUpdate(LoginRequiredMixin, UpdateView):
     model = Cheque
     form_class = ChequeForm
     template_name = 'core/cheque/form.html'
     success_url = reverse_lazy('cheque-list')
     extra_context = {'titulo': 'Editar Cheque'}
     
-    def form_valid(self, form):
-        cheque = form.save(commit=False)
-        original_cheque = Cheque.objects.get(pk=cheque.pk)
-        
-        # Se o status mudou de pendente para compensado, atualizar saldo
-        if original_cheque.status == 'pending' and cheque.status == 'cashed':
-            # Opcionalmente, atualizar o saldo da conta aqui
-            # account = cheque.account
-            # account.balance -= cheque.value
-            # account.save()
-            pass  # Remova este 'pass' quando implementar a lógica acima
-        # Se o status mudou de compensado para cancelado, restaurar saldo
-        elif original_cheque.status == 'cashed' and cheque.status == 'canceled':
-            # Opcionalmente, restaurar o saldo da conta aqui
-            # account = cheque.account
-            # account.balance += cheque.value
-            # account.save()
-            pass  # Remova este 'pass' quando implementar a lógica acima
-            
-        return super().form_valid(form)
+    def get_queryset(self):
+        # Permitir editar apenas cheques do usuário logado
+        return Cheque.objects.filter(user=self.request.user)
 
-class ChequeDelete(DeleteView):
+class ChequeDelete(LoginRequiredMixin, DeleteView):
     model = Cheque
     template_name = 'core/cheque/confirm_delete.html'
     success_url = reverse_lazy('cheque-list')
     extra_context = {'titulo': 'Excluir Cheque'}
+    
+    def get_queryset(self):
+        # Permitir excluir apenas cheques do usuário logado
+        return Cheque.objects.filter(user=self.request.user)
+
+# ——— PAYMENT METHOD ———
+
+class PaymentMethodCreate(LoginRequiredMixin, CreateView):
+    model = PaymentMethod
+    fields = ['name', 'description', 'supports_installments', 'max_installments']
+    template_name = 'core/paymentmethod/form.html'
+    success_url = reverse_lazy('paymentmethod-list')
+    extra_context = {'titulo': 'Cadastrar Método de Pagamento'}
+
+class PaymentMethodList(LoginRequiredMixin, ListView):
+    model = PaymentMethod
+    template_name = 'core/paymentmethod/list.html'
+    extra_context = {
+        'titulo': 'Lista de Métodos de Pagamento',
+        'create_url_name': 'paymentmethod-create',
+        'create_button_label': 'Novo Método'
+    }
+
+class PaymentMethodUpdate(LoginRequiredMixin, UpdateView):
+    model = PaymentMethod
+    fields = ['name', 'description', 'supports_installments', 'max_installments']
+    template_name = 'core/paymentmethod/form.html'
+    success_url = reverse_lazy('paymentmethod-list')
+    extra_context = {'titulo': 'Editar Método de Pagamento'}
+
+class PaymentMethodDelete(LoginRequiredMixin, DeleteView):
+    model = PaymentMethod
+    template_name = 'core/paymentmethod/confirm_delete.html'
+    success_url = reverse_lazy('paymentmethod-list')
+    extra_context = {'titulo': 'Excluir Método de Pagamento'}
 
 # ——— CATEGORY ———
 
-class CategoryList(ListView):
+class CategoryCreate(LoginRequiredMixin, CreateView):
+    model = Category
+    fields = ['name', 'description']
+    template_name = 'core/category/form.html'
+    success_url = reverse_lazy('category-list')
+    extra_context = {'titulo': 'Cadastrar Categoria'}
+
+class CategoryList(LoginRequiredMixin, ListView):
     model = Category
     template_name = 'core/category/list.html'
     extra_context = {
@@ -194,21 +194,14 @@ class CategoryList(ListView):
         'create_button_label': 'Nova Categoria'
     }
 
-class CategoryCreate(CreateView):
-    model = Category
-    fields = ['name', 'description']
-    template_name = 'core/category/form.html'
-    success_url = reverse_lazy('category-list')
-    extra_context = {'titulo': 'Cadastrar Categoria'}
-
-class CategoryUpdate(UpdateView):
+class CategoryUpdate(LoginRequiredMixin, UpdateView):
     model = Category
     fields = ['name', 'description']
     template_name = 'core/category/form.html'
     success_url = reverse_lazy('category-list')
     extra_context = {'titulo': 'Editar Categoria'}
 
-class CategoryDelete(DeleteView):
+class CategoryDelete(LoginRequiredMixin, DeleteView):
     model = Category
     template_name = 'core/category/confirm_delete.html'
     success_url = reverse_lazy('category-list')
@@ -216,7 +209,19 @@ class CategoryDelete(DeleteView):
 
 # ——— ACCOUNT ———
 
-class AccountList(ListView):
+class AccountCreate(LoginRequiredMixin, CreateView):
+    model = Account
+    fields = ['identifier', 'balance']
+    template_name = 'core/account/form.html'
+    success_url = reverse_lazy('account-list')
+    extra_context = {'titulo': 'Cadastrar Conta'}
+    
+    def form_valid(self, form):
+        account = form.save(commit=False)
+        account.user = self.request.user  # Atribuir usuário automaticamente
+        return super().form_valid(form)
+
+class AccountList(LoginRequiredMixin, ListView):
     model = Account
     template_name = 'core/account/list.html'
     extra_context = {
@@ -225,31 +230,28 @@ class AccountList(ListView):
         'create_button_label': 'Nova Conta'
     }
     
-    # Sem filtro por usuário - mostra todas as contas
+    def get_queryset(self):
+        # Mostrar apenas contas do usuário logado
+        return Account.objects.filter(user=self.request.user)
 
-class AccountCreate(CreateView):
+class AccountUpdate(LoginRequiredMixin, UpdateView):
     model = Account
-    fields = ['identifier', 'balance', 'user']  # Adicionado 'user' ao formulário
-    template_name = 'core/account/form.html'
-    success_url = reverse_lazy('account-list')
-    extra_context = {'titulo': 'Cadastrar Conta'}
-    
-    # Sem override do form_valid - permite selecionar qualquer usuário
-
-class AccountUpdate(UpdateView):
-    model = Account
-    fields = ['identifier', 'balance', 'user']  # Adicionado 'user' ao formulário
+    fields = ['identifier', 'balance']
     template_name = 'core/account/form.html'
     success_url = reverse_lazy('account-list')
     extra_context = {'titulo': 'Editar Conta'}
     
-    # Sem get_queryset override - permite editar qualquer conta
+    def get_queryset(self):
+        # Permitir editar apenas contas do usuário logado
+        return Account.objects.filter(user=self.request.user)
 
-class AccountDelete(DeleteView):
+class AccountDelete(LoginRequiredMixin, DeleteView):
     model = Account
     template_name = 'core/account/confirm_delete.html'
     success_url = reverse_lazy('account-list')
     extra_context = {'titulo': 'Excluir Conta'}
     
-    # Sem get_queryset override - permite excluir qualquer conta
-    
+    def get_queryset(self):
+        # Permitir excluir apenas contas do usuário logado
+        return Account.objects.filter(user=self.request.user)
+
