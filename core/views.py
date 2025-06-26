@@ -150,13 +150,13 @@ class ChequeDelete(LoginRequiredMixin, DeleteView):
 class PaymentMethodCreate(LoginRequiredMixin, CreateView):
     model = PaymentMethod
     fields = ['name', 'description', 'supports_installments', 'max_installments']
-    template_name = 'core/paymentmethod/form.html'
+    template_name = 'core/payment_method/form.html'
     success_url = reverse_lazy('paymentmethod-list')
     extra_context = {'titulo': 'Cadastrar Método de Pagamento'}
 
 class PaymentMethodList(LoginRequiredMixin, ListView):
     model = PaymentMethod
-    template_name = 'core/paymentmethod/list.html'
+    template_name = 'core/payment_method/list.html'
     extra_context = {
         'titulo': 'Lista de Métodos de Pagamento',
         'create_url_name': 'paymentmethod-create',
@@ -166,7 +166,7 @@ class PaymentMethodList(LoginRequiredMixin, ListView):
 class PaymentMethodUpdate(LoginRequiredMixin, UpdateView):
     model = PaymentMethod
     fields = ['name', 'description', 'supports_installments', 'max_installments']
-    template_name = 'core/paymentmethod/form.html'
+    template_name = 'core/payment_method/form.html'
     success_url = reverse_lazy('paymentmethod-list')
     extra_context = {'titulo': 'Editar Método de Pagamento'}
 
