@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-#3p=(_+@+ghilekvdo)!*c45ij4)s4gjct#jknd!u$azcmek0e
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -78,23 +78,23 @@ WSGI_APPLICATION = 'financialAssistant.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "postgres",
-        "USER": "postgres.ojvelwyztnshpgmhblcz",
-        "PASSWORD": "Duba1234!",
-        "HOST": "aws-0-sa-east-1.pooler.supabase.com",
-        "PORT": "6543",
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.postgresql",
+#         "NAME": "postgres",
+#         "USER": "postgres.ojvelwyztnshpgmhblcz",
+#         "PASSWORD": "Duba1234!",
+#         "HOST": "aws-0-sa-east-1.pooler.supabase.com",
+#         "PORT": "6543",
+#     }
+# }
 
 
 
@@ -134,7 +134,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [ BASE_DIR / "static" ]
-STATIC_ROOT = "static_gcloud/"
+STATIC_ROOT = BASE_DIR / "static_gcloud/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
