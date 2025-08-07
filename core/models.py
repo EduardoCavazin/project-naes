@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 class Category(models.Model):
     name        = models.CharField("Nome", max_length=100)
     description = models.TextField("Descrição", blank=True)
+    user        = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Usuário")
 
     def __str__(self):
         return self.name
@@ -14,7 +15,8 @@ class PaymentMethod(models.Model):
     description = models.TextField("Descrição", blank=True)
     supports_installments = models.BooleanField("Suporta Parcelamento", default=False)
     max_installments = models.PositiveSmallIntegerField("Número Máximo de Parcelas", default=1)
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Usuário")
+    
     def __str__(self):
         return self.name
 

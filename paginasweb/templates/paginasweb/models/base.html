@@ -30,16 +30,57 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive" 
               aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         Menu <i class="fas fa-bars"></i>
-      </button>      <div class="collapse navbar-collapse" id="navbarResponsive">
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
         <ul class="navbar-nav ms-auto py-4 py-lg-0">
+          <!-- Links sempre visíveis -->
           <li class="nav-item"><a class="nav-link" href="{% url 'index' %}">Home</a></li>
           <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">About</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'expense-list' %}">Despesas</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'category-list' %}">Categorias</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'account-list' %}">Contas</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'cheque-list' %}">Cheques</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'paymentmethod-list' %}">Métodos de Pagamento</a></li>
-          {% comment %} <li class="nav-item"><a class="nav-link" href="{% url 'contact' %}">Contact</a></li> {% endcomment %}
+          
+          {% if user.is_authenticated %}
+            <!-- Links para usuários LOGADOS -->
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" 
+                 data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user"></i> {{ user.username }}
+              </a>
+              <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" href="{% url 'expense-list' %}">
+                  <i class="fas fa-money-bill"></i> Minhas Despesas
+                </a></li>
+                <li><a class="dropdown-item" href="{% url 'account-list' %}">
+                  <i class="fas fa-university"></i> Minhas Contas
+                </a></li>
+                <li><a class="dropdown-item" href="{% url 'cheque-list' %}">
+                  <i class="fas fa-file-invoice"></i> Meus Cheques
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'category-list' %}">
+                  <i class="fas fa-tags"></i> Categorias
+                </a></li>
+                <li><a class="dropdown-item" href="{% url 'paymentmethod-list' %}">
+                  <i class="fas fa-credit-card"></i> Métodos
+                </a></li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </a>
+            </li>
+          {% else %}
+            <!-- Links para usuários NÃO LOGADOS -->
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'login' %}">
+                <i class="fas fa-sign-in-alt"></i> Login
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'register' %}">
+                <i class="fas fa-user-plus"></i> Cadastrar
+              </a>
+            </li>
+          {% endif %}
         </ul>
       </div>
     </div>
