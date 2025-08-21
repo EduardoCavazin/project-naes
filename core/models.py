@@ -5,9 +5,25 @@ class Category(models.Model):
     name        = models.CharField("Nome", max_length=100)
     description = models.TextField("Descrição", blank=True)
     user        = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Usuário")
+    is_public   = models.BooleanField("Categoria Pública", default=False, help_text="Categorias públicas podem ser usadas por todos os usuários")
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        # Se o usuário é admin/superuser, a categoria pode ser pública
+        if self.user and self.user.is_superuser:
+            # Manter o valor que foi definido (pode ser True ou False)
+            pass
+        else:
+            # Usuários comuns sempre criam categorias privadas
+            self.is_public = False
+        super().save(*args, **kwargs)
+    
+    class Meta:
+        verbose_name = "Categoria"
+        verbose_name_plural = "Categorias"
+        ordering = ['name']
 
 
 class PaymentMethod(models.Model):

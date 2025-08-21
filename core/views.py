@@ -16,6 +16,11 @@ class ExpenseCreate(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('expense-list')
     extra_context = {'titulo': 'Cadastrar Despesa'}
     
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
     def form_valid(self, form):
         expense = form.save(commit=False)
         expense.user = self.request.user  # Atribuir usuário automaticamente
@@ -82,6 +87,11 @@ class ExpenseUpdate(LoginRequiredMixin, UpdateView):
     template_name = 'core/expense/form.html'
     success_url = reverse_lazy('expense-list')
     extra_context = {'titulo': 'Editar Despesa'}
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
     
     def get_queryset(self):
         # Permitir editar apenas despesas do usuário logado
@@ -180,10 +190,41 @@ class PaymentMethodDelete(LoginRequiredMixin, DeleteView):
 
 class CategoryCreate(LoginRequiredMixin, CreateView):
     model = Category
-    fields = ['name', 'description']
     template_name = 'core/category/form.html'
     success_url = reverse_lazy('category-list')
     extra_context = {'titulo': 'Cadastrar Categoria'}
+    
+    def get_form_class(self):
+        from django import forms
+        
+        class CategoryForm(forms.ModelForm):
+            class Meta:
+                model = Category
+                fields = ['name', 'description']
+                
+            # Adicionar campo is_public apenas para admins
+            def __init__(self, *args, **kwargs):
+                self.user = kwargs.pop('user', None)
+                super().__init__(*args, **kwargs)
+                
+                if self.user and self.user.is_superuser:
+                    self.fields['is_public'] = forms.BooleanField(
+                        label='Categoria Pública',
+                        required=False,
+                        help_text='Marque para que todos os usuários possam usar esta categoria'
+                    )
+        
+        return CategoryForm
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    def form_valid(self, form):
+        category = form.save(commit=False)
+        category.user = self.request.user
+        return super().form_valid(form)
 
 class CategoryList(LoginRequiredMixin, ListView):
     model = Category
@@ -193,19 +234,67 @@ class CategoryList(LoginRequiredMixin, ListView):
         'create_url_name': 'category-create',
         'create_button_label': 'Nova Categoria'
     }
+    
+    def get_queryset(self):
+        # Mostrar categorias do usuário + categorias públicas
+        from django.db.models import Q
+        return Category.objects.filter(
+            Q(user=self.request.user) | Q(is_public=True)
+        ).distinct()
 
 class CategoryUpdate(LoginRequiredMixin, UpdateView):
     model = Category
-    fields = ['name', 'description']
     template_name = 'core/category/form.html'
     success_url = reverse_lazy('category-list')
     extra_context = {'titulo': 'Editar Categoria'}
+    
+    def get_form_class(self):
+        from django import forms
+        
+        class CategoryForm(forms.ModelForm):
+            class Meta:
+                model = Category
+                fields = ['name', 'description']
+                
+            def __init__(self, *args, **kwargs):
+                self.user = kwargs.pop('user', None)
+                super().__init__(*args, **kwargs)
+                
+                if self.user and self.user.is_superuser:
+                    self.fields['is_public'] = forms.BooleanField(
+                        label='Categoria Pública',
+                        required=False,
+                        help_text='Marque para que todos os usuários possam usar esta categoria'
+                    )
+        
+        return CategoryForm
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    def get_queryset(self):
+        # Permitir editar apenas categorias próprias (usuários comuns)
+        # Admins podem editar qualquer categoria
+        if self.request.user.is_superuser:
+            return Category.objects.all()
+        else:
+            return Category.objects.filter(user=self.request.user)
 
 class CategoryDelete(LoginRequiredMixin, DeleteView):
     model = Category
     template_name = 'core/category/confirm_delete.html'
     success_url = reverse_lazy('category-list')
     extra_context = {'titulo': 'Excluir Categoria'}
+    
+    def get_queryset(self):
+        # Permitir excluir apenas categorias próprias (usuários comuns)
+        # Admins podem excluir qualquer categoria
+        if self.request.user.is_superuser:
+            return Category.objects.all()
+        else:
+            return Category.objects.filter(user=self.request.user)
 
 # ——— ACCOUNT ———
 

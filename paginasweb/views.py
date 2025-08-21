@@ -18,7 +18,8 @@ class IndexView(TemplateView):
         
         # Total de despesas
         total_expenses = Expense.objects.aggregate(total=Sum('value'))
-        context['total_expenses'] = total_expenses['total'] or 0
+        total_value = total_expenses['total']
+        context['total_expenses'] = float(total_value) if total_value else 0
         
         # Dados para o gráfico de despesas mensais
         today = datetime.date.today()
@@ -36,7 +37,9 @@ class IndexView(TemplateView):
                 date__lte=end_date
             ).aggregate(total=Sum('value'))
             
-            monthly_expenses.append(month_total['total'] or 0)
+            # Converter Decimal para float para serialização JSON
+            total_value = month_total['total']
+            monthly_expenses.append(float(total_value) if total_value else 0)
         
         context['monthly_expenses_data'] = json.dumps(monthly_expenses)
         
