@@ -40,7 +40,6 @@ class PaymentMethod(models.Model):
 class Account(models.Model):
     user       = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Usuário")
     identifier = models.CharField("Identificador", max_length=50)
-    balance    = models.DecimalField("Saldo", max_digits=12, decimal_places=2)
 
     def __str__(self):
         return f"{self.identifier} ({self.user.username})"

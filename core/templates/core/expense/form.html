@@ -21,25 +21,53 @@
   const installmentsDiv = document.getElementById('installments_div');
   const installmentsInput = document.getElementById('id_installments');
   
-  if (paymentMethodSelect) {
+  // Inicialmente ocultar o campo de parcelas
+  if (installmentsDiv) {
+    installmentsDiv.style.display = 'none';
+  }
+  
+  if (paymentMethodSelect && installmentsDiv && installmentsInput) {
     const installmentMethodsData = JSON.parse(paymentMethodSelect.getAttribute('data-installment-methods') || '{}');
+    console.log('Installment methods data:', installmentMethodsData);
     
     function updateInstallmentsVisibility() {
       const selectedId = paymentMethodSelect.value;
-      if (selectedId && installmentMethodsData[selectedId] && installmentMethodsData[selectedId].supports) {
-        installmentsDiv.style.display = 'block';
-        const maxInstallments = installmentMethodsData[selectedId].max;
-        installmentsInput.max = maxInstallments;
-        if (parseInt(installmentsInput.value) > maxInstallments) {
-          installmentsInput.value = maxInstallments;
+      console.log('Selected payment method ID:', selectedId);
+      
+      if (selectedId && installmentMethodsData[selectedId]) {
+        const methodData = installmentMethodsData[selectedId];
+        console.log('Method data:', methodData);
+        
+        if (methodData.supports) {
+          installmentsDiv.style.display = 'block';
+          const maxInstallments = methodData.max || 1;
+          installmentsInput.max = maxInstallments;
+          
+          // Atualizar placeholder e helper text
+          const helpText = installmentsDiv.querySelector('.form-text');
+          if (helpText) {
+            helpText.textContent = `Selecione de 1 até ${maxInstallments} parcelas.`;
+          }
+          
+          // Validar valor atual
+          const currentValue = parseInt(installmentsInput.value) || 1;
+          if (currentValue > maxInstallments) {
+            installmentsInput.value = maxInstallments;
+          }
+        } else {
+          installmentsDiv.style.display = 'none';
+          installmentsInput.value = 1;
         }
       } else {
         installmentsDiv.style.display = 'none';
+        installmentsInput.value = 1;
       }
     }
     
+    // Executar na inicialização
     updateInstallmentsVisibility();
     
+    // Executar quando mudar seleção
     paymentMethodSelect.addEventListener('change', updateInstallmentsVisibility);
   }
 {% endblock form_specific_js %}

@@ -25,7 +25,8 @@ class ExpenseCreate(LoginRequiredMixin, CreateView):
         expense = form.save(commit=False)
         expense.user = self.request.user  # Atribuir usuário automaticamente
         
-        installments = form.cleaned_data.get('installments') or 1
+        # Pegar o valor do campo customizado de installments
+        installments = int(self.request.POST.get('installments', 1))
         
         payment_method = expense.payment_method
         if not payment_method.supports_installments:
@@ -116,6 +117,11 @@ class ChequeCreate(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('cheque-list')
     extra_context = {'titulo': 'Cadastrar Cheque'}
     
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
     def form_valid(self, form):
         cheque = form.save(commit=False)
         cheque.user = self.request.user  # Atribuir usuário automaticamente
@@ -141,6 +147,11 @@ class ChequeUpdate(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('cheque-list')
     extra_context = {'titulo': 'Editar Cheque'}
     
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
     def get_queryset(self):
         # Permitir editar apenas cheques do usuário logado
         return Cheque.objects.filter(user=self.request.user)
@@ -163,6 +174,11 @@ class PaymentMethodCreate(LoginRequiredMixin, CreateView):
     template_name = 'core/payment_method/form.html'
     success_url = reverse_lazy('paymentmethod-list')
     extra_context = {'titulo': 'Cadastrar Método de Pagamento'}
+    
+    def form_valid(self, form):
+        payment_method = form.save(commit=False)
+        payment_method.user = self.request.user  # Atribuir usuário automaticamente
+        return super().form_valid(form)
 
 class PaymentMethodList(LoginRequiredMixin, ListView):
     model = PaymentMethod
@@ -172,6 +188,10 @@ class PaymentMethodList(LoginRequiredMixin, ListView):
         'create_url_name': 'paymentmethod-create',
         'create_button_label': 'Novo Método'
     }
+    
+    def get_queryset(self):
+        # Mostrar apenas métodos do usuário logado
+        return PaymentMethod.objects.filter(user=self.request.user)
 
 class PaymentMethodUpdate(LoginRequiredMixin, UpdateView):
     model = PaymentMethod
@@ -179,12 +199,20 @@ class PaymentMethodUpdate(LoginRequiredMixin, UpdateView):
     template_name = 'core/payment_method/form.html'
     success_url = reverse_lazy('paymentmethod-list')
     extra_context = {'titulo': 'Editar Método de Pagamento'}
+    
+    def get_queryset(self):
+        # Permitir editar apenas métodos do usuário logado
+        return PaymentMethod.objects.filter(user=self.request.user)
 
 class PaymentMethodDelete(LoginRequiredMixin, DeleteView):
     model = PaymentMethod
     template_name = 'core/paymentmethod/confirm_delete.html'
     success_url = reverse_lazy('paymentmethod-list')
     extra_context = {'titulo': 'Excluir Método de Pagamento'}
+    
+    def get_queryset(self):
+        # Permitir excluir apenas métodos do usuário logado
+        return PaymentMethod.objects.filter(user=self.request.user)
 
 # ——— CATEGORY ———
 
@@ -300,7 +328,7 @@ class CategoryDelete(LoginRequiredMixin, DeleteView):
 
 class AccountCreate(LoginRequiredMixin, CreateView):
     model = Account
-    fields = ['identifier', 'balance']
+    fields = ['identifier']
     template_name = 'core/account/form.html'
     success_url = reverse_lazy('account-list')
     extra_context = {'titulo': 'Cadastrar Conta'}
@@ -325,7 +353,7 @@ class AccountList(LoginRequiredMixin, ListView):
 
 class AccountUpdate(LoginRequiredMixin, UpdateView):
     model = Account
-    fields = ['identifier', 'balance']
+    fields = ['identifier']
     template_name = 'core/account/form.html'
     success_url = reverse_lazy('account-list')
     extra_context = {'titulo': 'Editar Conta'}

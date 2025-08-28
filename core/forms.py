@@ -55,13 +55,6 @@ class BrazilianCurrencyField(forms.CharField):
 
 
 class ExpenseForm(forms.ModelForm):
-    installments = forms.IntegerField(
-        min_value=1,
-        initial=1,
-        required=False,
-        label="Número de Parcelas",
-        widget=forms.NumberInput(attrs={'class': 'form-control', 'id': 'id_installments'})
-    )
     
     # Usar o campo personalizado para valor
     value = BrazilianCurrencyField(
@@ -79,34 +72,41 @@ class ExpenseForm(forms.ModelForm):
             'description',
             'value',
             'date',
-            'user',
             'category',
             'payment_method',
             'account',
-            'installments',
         ]
         widgets = {
             'date': forms.DateInput(attrs={
-                'type': 'date',
+                'type': 'text',
                 'class': 'form-control',
-            }),
+                'placeholder': 'dd/mm/aaaa',
+                'data-mask': '00/00/0000',
+            }, format='%d/%m/%Y'),
         }
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if not self.instance.pk:
-            self.fields['date'].initial = datetime.date.today()
+            self.fields['date'].initial = datetime.date.today().strftime('%d/%m/%Y')
         
         # Filtrar categorias: próprias do usuário + categorias públicas
         if user:
             from django.db.models import Q
-            from .models import Category
+            from .models import Category, Account
             self.fields['category'].queryset = Category.objects.filter(
                 Q(user=user) | Q(is_public=True)
             ).distinct()
+            
+            # Filtrar contas: apenas do usuário logado
+            self.fields['account'].queryset = Account.objects.filter(user=user)
+            
+            # Filtrar métodos de pagamento: apenas do usuário logado
+            self.fields['payment_method'].queryset = PaymentMethod.objects.filter(user=user)
         
-        payment_methods = PaymentMethod.objects.all()
+        # Pegar apenas métodos do usuário para configurar parcelamento
+        payment_methods = PaymentMethod.objects.filter(user=user) if user else PaymentMethod.objects.all()
         supports_installments = {}
         for method in payment_methods:
             supports_installments[method.id] = {
@@ -135,22 +135,33 @@ class ChequeForm(forms.ModelForm):
             'compensation_date',
             'recipient',
             'account',
-            'user',
             'status',
         ]
         widgets = {
             'issue_date': forms.DateInput(attrs={
-                'type': 'date',
+                'type': 'text',
                 'class': 'form-control',
-            }),
+                'placeholder': 'dd/mm/aaaa',
+                'data-mask': '00/00/0000',
+            }, format='%d/%m/%Y'),
             'compensation_date': forms.DateInput(attrs={
-                'type': 'date',
+                'type': 'text',
                 'class': 'form-control',
-            }),
+                'placeholder': 'dd/mm/aaaa',
+                'data-mask': '00/00/0000',
+            }, format='%d/%m/%Y'),
         }
 
     def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         if not self.instance.pk:
-            self.fields['issue_date'].initial = datetime.date.today()
-            self.fields['compensation_date'].initial = datetime.date.today()
+            self.fields['issue_date'].initial = datetime.date.today().strftime('%d/%m/%Y')
+            # Data de compensação: amanhã (mais realista para cheques)
+            tomorrow = datetime.date.today() + datetime.timedelta(days=1)
+            self.fields['compensation_date'].initial = tomorrow.strftime('%d/%m/%Y')
+        
+        # Filtrar contas: apenas do usuário logado
+        if user:
+            from .models import Account
+            self.fields['account'].queryset = Account.objects.filter(user=user)
