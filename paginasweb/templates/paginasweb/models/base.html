@@ -61,6 +61,10 @@
                 <li><a class="dropdown-item" href="{% url 'paymentmethod-list' %}">
                   <i class="fas fa-credit-card"></i> Métodos
                 </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="{% url 'password_change' %}">
+                  <i class="fas fa-key"></i> Alterar Senha
+                </a></li>
               </ul>
             </li>
             <li class="nav-item">
@@ -135,6 +139,27 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <!-- Core theme JS -->
   <script src="{% static 'js/scripts.js' %}"></script>
+  
+  <!-- Máscara de data brasileira -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Aplicar máscara de data nos campos
+      const dateFields = document.querySelectorAll('[data-mask="00/00/0000"]');
+      dateFields.forEach(function(field) {
+        field.addEventListener('input', function(e) {
+          let value = e.target.value.replace(/\D/g, '');
+          if (value.length >= 2) {
+            value = value.substring(0,2) + '/' + value.substring(2);
+          }
+          if (value.length >= 5) {
+            value = value.substring(0,5) + '/' + value.substring(5,9);
+          }
+          e.target.value = value;
+        });
+      });
+    });
+  </script>
+  
   {% block extra_js %}{% endblock extra_js %}
 </body>
 </html>

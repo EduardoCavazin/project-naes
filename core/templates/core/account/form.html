@@ -11,23 +11,5 @@
 {% endblock form_fields %}
 
 {% block form_specific_js %}
-  const balanceField = document.getElementById('id_balance');
-  
-  if (balanceField) {
-    // Formatar o valor inicial
-    if (balanceField.value) {
-      const numericValue = parseFloat(balanceField.value);
-      balanceField.value = numericValue.toFixed(2);
-    }
-    
-    // Garantir que o campo aceite números negativos e decimais
-    balanceField.addEventListener('input', function(e) {
-      // Permitir apenas números, ponto decimal e sinal negativo
-      const regex = /^-?\d*\.?\d*$/;
-      if (!regex.test(this.value)) {
-        // Se inválido, reverter para o valor anterior
-        this.value = this.value.slice(0, -1);
-      }
-    });
-  }
+  // Nenhum JavaScript específico necessário para o formulário simplificado
 {% endblock form_specific_js %}

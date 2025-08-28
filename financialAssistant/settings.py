@@ -128,6 +128,13 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Formatação de data/hora brasileira
+USE_L10N = True
+DATE_FORMAT = 'd/m/Y'
+DATETIME_FORMAT = 'd/m/Y H:i'
+DATE_INPUT_FORMATS = ['%d/%m/%Y', '%Y-%m-%d']
+DATETIME_INPUT_FORMATS = ['%d/%m/%Y %H:%M', '%Y-%m-%d %H:%M']
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
@@ -148,3 +155,13 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 LOGIN_REDIRECT_URL = "index"
 LOGOUT_REDIRECT_URL = "index"
 LOGIN_URL = "login"
+
+# Configurações de Email (para desenvolvimento)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# Para produção, usar:
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = 'seu-email@gmail.com'
+# EMAIL_HOST_PASSWORD = 'sua-senha-de-app'

@@ -6,21 +6,41 @@
 {% block table_headers %}
   <th>Nome</th>
   <th>Descrição</th>
+  <th>Visibilidade</th>
   <th class="text-end">Ações</th>
 {% endblock %}
 
 {% block table_row %}
-  <td>{{ obj.name }}</td>
+  <td>
+    {{ obj.name }}
+    {% if obj.is_public %}
+      <i class="fas fa-globe text-primary ms-1" title="Categoria Pública"></i>
+    {% else %}
+      <i class="fas fa-lock text-muted ms-1" title="Categoria Privada"></i>
+    {% endif %}
+  </td>
   <td>{{ obj.description|truncatechars:50 }}</td>
+  <td>
+    {% if obj.is_public %}
+      <span class="badge bg-primary">Pública</span>
+    {% else %}
+      <span class="badge bg-secondary">Privada</span>
+    {% endif %}
+    <br><small class="text-muted">Criada por: {{ obj.user.username }}</small>
+  </td>
   <td class="text-end">
-    <a href="{% url 'category-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
-      <i class="fas fa-edit"></i>
-    </a>
-    <a href="{% url 'category-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
-      <i class="fas fa-trash-alt"></i>
-    </a>
+    {% if obj.user == user or user.is_superuser %}
+      <a href="{% url 'category-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
+        <i class="fas fa-edit"></i>
+      </a>
+      <a href="{% url 'category-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
+        <i class="fas fa-trash-alt"></i>
+      </a>
+    {% else %}
+      <span class="text-muted"><i class="fas fa-eye"></i> Somente leitura</span>
+    {% endif %}
   </td>
 {% endblock %}
 
-{% block empty_colspan %}3{% endblock %}
+{% block empty_colspan %}4{% endblock %}
 {% block empty_message %}Nenhuma categoria cadastrada.{% endblock %}

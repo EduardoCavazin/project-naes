@@ -16,11 +16,17 @@ class ExpenseCreate(LoginRequiredMixin, CreateView):
     success_url = reverse_lazy('expense-list')
     extra_context = {'titulo': 'Cadastrar Despesa'}
     
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
     def form_valid(self, form):
         expense = form.save(commit=False)
         expense.user = self.request.user  # Atribuir usuário automaticamente
         
-        installments = form.cleaned_data.get('installments') or 1
+        # Pegar o valor do campo customizado de installments
+        installments = int(self.request.POST.get('installments', 1))
         
         payment_method = expense.payment_method
         if not payment_method.supports_installments:
@@ -83,6 +89,11 @@ class ExpenseUpdate(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('expense-list')
     extra_context = {'titulo': 'Editar Despesa'}
     
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
     def get_queryset(self):
         # Permitir editar apenas despesas do usuário logado
         return Expense.objects.filter(user=self.request.user)
@@ -105,6 +116,11 @@ class ChequeCreate(LoginRequiredMixin, CreateView):
     template_name = 'core/cheque/form.html'
     success_url = reverse_lazy('cheque-list')
     extra_context = {'titulo': 'Cadastrar Cheque'}
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
     
     def form_valid(self, form):
         cheque = form.save(commit=False)
@@ -131,6 +147,11 @@ class ChequeUpdate(LoginRequiredMixin, UpdateView):
     success_url = reverse_lazy('cheque-list')
     extra_context = {'titulo': 'Editar Cheque'}
     
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
     def get_queryset(self):
         # Permitir editar apenas cheques do usuário logado
         return Cheque.objects.filter(user=self.request.user)
@@ -153,6 +174,11 @@ class PaymentMethodCreate(LoginRequiredMixin, CreateView):
     template_name = 'core/payment_method/form.html'
     success_url = reverse_lazy('paymentmethod-list')
     extra_context = {'titulo': 'Cadastrar Método de Pagamento'}
+    
+    def form_valid(self, form):
+        payment_method = form.save(commit=False)
+        payment_method.user = self.request.user  # Atribuir usuário automaticamente
+        return super().form_valid(form)
 
 class PaymentMethodList(LoginRequiredMixin, ListView):
     model = PaymentMethod
@@ -162,6 +188,10 @@ class PaymentMethodList(LoginRequiredMixin, ListView):
         'create_url_name': 'paymentmethod-create',
         'create_button_label': 'Novo Método'
     }
+    
+    def get_queryset(self):
+        # Mostrar apenas métodos do usuário logado
+        return PaymentMethod.objects.filter(user=self.request.user)
 
 class PaymentMethodUpdate(LoginRequiredMixin, UpdateView):
     model = PaymentMethod
@@ -169,21 +199,60 @@ class PaymentMethodUpdate(LoginRequiredMixin, UpdateView):
     template_name = 'core/payment_method/form.html'
     success_url = reverse_lazy('paymentmethod-list')
     extra_context = {'titulo': 'Editar Método de Pagamento'}
+    
+    def get_queryset(self):
+        # Permitir editar apenas métodos do usuário logado
+        return PaymentMethod.objects.filter(user=self.request.user)
 
 class PaymentMethodDelete(LoginRequiredMixin, DeleteView):
     model = PaymentMethod
     template_name = 'core/paymentmethod/confirm_delete.html'
     success_url = reverse_lazy('paymentmethod-list')
     extra_context = {'titulo': 'Excluir Método de Pagamento'}
+    
+    def get_queryset(self):
+        # Permitir excluir apenas métodos do usuário logado
+        return PaymentMethod.objects.filter(user=self.request.user)
 
 # ——— CATEGORY ———
 
 class CategoryCreate(LoginRequiredMixin, CreateView):
     model = Category
-    fields = ['name', 'description']
     template_name = 'core/category/form.html'
     success_url = reverse_lazy('category-list')
     extra_context = {'titulo': 'Cadastrar Categoria'}
+    
+    def get_form_class(self):
+        from django import forms
+        
+        class CategoryForm(forms.ModelForm):
+            class Meta:
+                model = Category
+                fields = ['name', 'description']
+                
+            # Adicionar campo is_public apenas para admins
+            def __init__(self, *args, **kwargs):
+                self.user = kwargs.pop('user', None)
+                super().__init__(*args, **kwargs)
+                
+                if self.user and self.user.is_superuser:
+                    self.fields['is_public'] = forms.BooleanField(
+                        label='Categoria Pública',
+                        required=False,
+                        help_text='Marque para que todos os usuários possam usar esta categoria'
+                    )
+        
+        return CategoryForm
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    def form_valid(self, form):
+        category = form.save(commit=False)
+        category.user = self.request.user
+        return super().form_valid(form)
 
 class CategoryList(LoginRequiredMixin, ListView):
     model = Category
@@ -193,25 +262,73 @@ class CategoryList(LoginRequiredMixin, ListView):
         'create_url_name': 'category-create',
         'create_button_label': 'Nova Categoria'
     }
+    
+    def get_queryset(self):
+        # Mostrar categorias do usuário + categorias públicas
+        from django.db.models import Q
+        return Category.objects.filter(
+            Q(user=self.request.user) | Q(is_public=True)
+        ).distinct()
 
 class CategoryUpdate(LoginRequiredMixin, UpdateView):
     model = Category
-    fields = ['name', 'description']
     template_name = 'core/category/form.html'
     success_url = reverse_lazy('category-list')
     extra_context = {'titulo': 'Editar Categoria'}
+    
+    def get_form_class(self):
+        from django import forms
+        
+        class CategoryForm(forms.ModelForm):
+            class Meta:
+                model = Category
+                fields = ['name', 'description']
+                
+            def __init__(self, *args, **kwargs):
+                self.user = kwargs.pop('user', None)
+                super().__init__(*args, **kwargs)
+                
+                if self.user and self.user.is_superuser:
+                    self.fields['is_public'] = forms.BooleanField(
+                        label='Categoria Pública',
+                        required=False,
+                        help_text='Marque para que todos os usuários possam usar esta categoria'
+                    )
+        
+        return CategoryForm
+    
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+    
+    def get_queryset(self):
+        # Permitir editar apenas categorias próprias (usuários comuns)
+        # Admins podem editar qualquer categoria
+        if self.request.user.is_superuser:
+            return Category.objects.all()
+        else:
+            return Category.objects.filter(user=self.request.user)
 
 class CategoryDelete(LoginRequiredMixin, DeleteView):
     model = Category
     template_name = 'core/category/confirm_delete.html'
     success_url = reverse_lazy('category-list')
     extra_context = {'titulo': 'Excluir Categoria'}
+    
+    def get_queryset(self):
+        # Permitir excluir apenas categorias próprias (usuários comuns)
+        # Admins podem excluir qualquer categoria
+        if self.request.user.is_superuser:
+            return Category.objects.all()
+        else:
+            return Category.objects.filter(user=self.request.user)
 
 # ——— ACCOUNT ———
 
 class AccountCreate(LoginRequiredMixin, CreateView):
     model = Account
-    fields = ['identifier', 'balance']
+    fields = ['identifier']
     template_name = 'core/account/form.html'
     success_url = reverse_lazy('account-list')
     extra_context = {'titulo': 'Cadastrar Conta'}
@@ -236,7 +353,7 @@ class AccountList(LoginRequiredMixin, ListView):
 
 class AccountUpdate(LoginRequiredMixin, UpdateView):
     model = Account
-    fields = ['identifier', 'balance']
+    fields = ['identifier']
     template_name = 'core/account/form.html'
     success_url = reverse_lazy('account-list')
     extra_context = {'titulo': 'Editar Conta'}

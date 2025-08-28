@@ -1,0 +1,49 @@
+{% extends "core/models/form_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block form_title %}Cadastro de Usuário{% endblock form_title %}
+{% block form_subtitle %}
+  <p class="text-muted">Crie sua conta para acessar o sistema</p>
+{% endblock form_subtitle %}
+
+{% block form_fields %}
+  {{ form|crispy }}
+{% endblock form_fields %}
+
+{% block extra_content %}
+<div class="text-center mt-3">
+  <p>Já tem uma conta? <a href="{% url 'login' %}" class="text-primary">Faça login</a></p>
+</div>
+{% endblock extra_content %}
+
+{% block form_specific_js %}
+  // Validação de email em tempo real
+  const emailField = document.getElementById('id_email');
+  
+  if (emailField) {
+    emailField.addEventListener('blur', function(e) {
+      const email = this.value;
+      if (email) {
+        // Validação básica de formato de email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          this.classList.add('is-invalid');
+          // Adicionar mensagem de erro se não existir
+          let feedback = this.parentNode.querySelector('.invalid-feedback');
+          if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback';
+            this.parentNode.appendChild(feedback);
+          }
+          feedback.textContent = 'Por favor, insira um email válido.';
+        } else {
+          this.classList.remove('is-invalid');
+          const feedback = this.parentNode.querySelector('.invalid-feedback');
+          if (feedback) {
+            feedback.remove();
+          }
+        }
+      }
+    });
+  }
+{% endblock form_specific_js %}
