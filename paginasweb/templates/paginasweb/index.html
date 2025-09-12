@@ -11,9 +11,19 @@
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="{% static 'js/charts/area_chart.js' %}"></script>
-<script src="{% static 'js/charts/pie_chart.js' %}"></script>
-<script src="{% static 'js/dashboard.js' %}"></script>
+<script src="{% static 'js/charts/area_chart.js' %}?v=5"></script>
+<script src="{% static 'js/charts/pie_chart.js' %}?v=2"></script>
+
+<!-- Dados dos gráficos (inline para evitar problemas de encoding) -->
+<script>
+    window.chartData = {
+        monthlyExpenses: {{ monthly_expenses_data|safe }},
+        categoryLabels: {{ category_labels|safe }},
+        categoryData: {{ category_data|safe }}
+    };
+</script>
+
+<script src="{% static 'js/dashboard.js' %}?v=2"></script>
 {% endblock extra_js %}
 
 {% block header %}
@@ -172,7 +182,7 @@
             </div>
             <div class="card-body">
               <div class="chart-area">
-                <canvas id="myAreaChart" width="100%" height="40"></canvas>
+                <canvas id="myAreaChart" width="100%" height="300"></canvas>
               </div>
             </div>
           </div>

@@ -79,8 +79,10 @@ class ExpenseList(LoginRequiredMixin, ListView):
     }
     
     def get_queryset(self):
-        # Mostrar apenas despesas do usuário logado
-        return Expense.objects.filter(user=self.request.user)
+        # Mostrar apenas despesas do usuário logado com otimização de queries
+        return Expense.objects.select_related(
+            'category', 'payment_method', 'account'
+        ).filter(user=self.request.user)
 
 class ExpenseUpdate(LoginRequiredMixin, UpdateView):
     model = Expense
@@ -137,8 +139,8 @@ class ChequeList(LoginRequiredMixin, ListView):
     }
     
     def get_queryset(self):
-        # Mostrar apenas cheques do usuário logado
-        return Cheque.objects.filter(user=self.request.user)
+        # Mostrar apenas cheques do usuário logado com otimização de queries
+        return Cheque.objects.select_related('account').filter(user=self.request.user)
 
 class ChequeUpdate(LoginRequiredMixin, UpdateView):
     model = Cheque
@@ -264,9 +266,9 @@ class CategoryList(LoginRequiredMixin, ListView):
     }
     
     def get_queryset(self):
-        # Mostrar categorias do usuário + categorias públicas
+        # Mostrar categorias do usuário + categorias públicas com otimização
         from django.db.models import Q
-        return Category.objects.filter(
+        return Category.objects.select_related('user').filter(
             Q(user=self.request.user) | Q(is_public=True)
         ).distinct()
 

@@ -29,55 +29,57 @@ class IndexView(TemplateView):
             total_value = total_expenses['total']
             context['total_expenses'] = float(total_value) if total_value else 0
             
-            # Dados para o gráfico de despesas mensais do usuário
+            # Dados para o gráfico de despesas mensais do usuário (OTIMIZADO)
             today = datetime.date.today()
             current_year = today.year
-            monthly_expenses = []
             
-            # Obtém as despesas mensais do usuário para o ano atual
-            for month in range(1, 13):
-                last_day = calendar.monthrange(current_year, month)[1]
-                start_date = datetime.date(current_year, month, 1)
-                end_date = datetime.date(current_year, month, last_day)
-                
-                month_total = Expense.objects.filter(
-                    user=user,
-                    date__gte=start_date, 
-                    date__lte=end_date
-                ).aggregate(total=Sum('value'))
-                
-                # Converter Decimal para float para serialização JSON
-                total_value = month_total['total']
-                monthly_expenses.append(float(total_value) if total_value else 0)
+            # Uma única query com agregação por mês (em vez de 12 queries)
+            monthly_data = Expense.objects.filter(
+                user=user,
+                date__year=current_year
+            ).values(
+                'date__month'
+            ).annotate(
+                total=Sum('value')
+            ).order_by('date__month')
             
-            # Se não há dados mensais, usar dados de exemplo
+            # Criar array com 12 posições (janeiro a dezembro)
+            monthly_expenses = [0] * 12
+            for item in monthly_data:
+                month_index = item['date__month'] - 1  # Janeiro = índice 0
+                monthly_expenses[month_index] = float(item['total']) if item['total'] else 0
+            
+            # Se não há dados mensais, usar dados de exemplo  
             if not any(monthly_expenses):
                 monthly_expenses = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             
-            context['monthly_expenses_data'] = json.dumps(monthly_expenses)
+            context['monthly_expenses_data'] = json.dumps(monthly_expenses, ensure_ascii=False)
             
-            # Dados para o gráfico de distribuição por categoria do usuário
-            categories = Category.objects.filter(
-                Q(user=user) | Q(is_public=True)
-            )
+            # Dados para o gráfico de distribuição por categoria do usuário (OTIMIZADO)
+            # Uma única query com JOIN + agregação (em vez de N queries)
+            category_stats = Expense.objects.filter(
+                user=user
+            ).values(
+                'category__name'
+            ).annotate(
+                total=Sum('value')
+            ).order_by('-total')
+            
             category_data = []
             category_labels = []
             
-            for category in categories:
-                total = Expense.objects.filter(
-                    user=user, category=category
-                ).aggregate(total=Sum('value'))
-                if total['total']:
-                    category_data.append(float(total['total']))
-                    category_labels.append(category.name)
+            for stat in category_stats:
+                if stat['total'] and stat['category__name']:
+                    category_data.append(float(stat['total']))
+                    category_labels.append(stat['category__name'])
             
             # Se não há dados de categoria, usar dados de exemplo
             if not category_data:
                 category_data = [0]
                 category_labels = ['Nenhuma despesa cadastrada']
             
-            context['category_data'] = json.dumps(category_data)
-            context['category_labels'] = json.dumps(category_labels)
+            context['category_data'] = json.dumps(category_data, ensure_ascii=False)
+            context['category_labels'] = json.dumps(category_labels, ensure_ascii=False)
             
         else:
             # DADOS DEMO PARA USUÁRIOS NÃO LOGADOS
@@ -90,12 +92,12 @@ class IndexView(TemplateView):
             context['monthly_expenses_data'] = json.dumps([
                 2850, 3100, 2750, 3200, 2900, 3350, 
                 3100, 3247, 2950, 3400, 3150, 2800
-            ])
-            context['category_data'] = json.dumps([850, 450, 380, 290, 220, 180])
+            ], ensure_ascii=False)
+            context['category_data'] = json.dumps([850, 450, 380, 290, 220, 180], ensure_ascii=False)
             context['category_labels'] = json.dumps([
                 'Alimentação', 'Transporte', 'Saúde', 
                 'Lazer', 'Educação', 'Outros'
-            ])
+            ], ensure_ascii=False)
         
         return context
 
