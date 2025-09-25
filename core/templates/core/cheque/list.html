@@ -3,6 +3,155 @@
 
 {% block title %}Lista de Cheques{% endblock %}
 
+{% block table_id %}cheques-table{% endblock %}
+{% block page_icon %}money-check{% endblock %}
+{% block page_description %}Gerencie todos seus cheques e status de compensação{% endblock %}
+{% block empty_icon %}money-check-alt{% endblock %}
+{% block empty_message %}Nenhum cheque cadastrado{% endblock %}
+{% block empty_description %}Comece registrando seu primeiro cheque{% endblock %}
+
+{% block filters %}
+<div class="card mb-4 border-0 shadow-sm">
+  <div class="card-header bg-light border-0 py-3">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h5 class="mb-0 text-info">
+          <i class="fas fa-filter me-2"></i>Filtros de Cheques
+          <small class="text-muted ms-2">Encontre cheques específicos</small>
+        </h5>
+      </div>
+      <div class="col-md-4 text-end">
+        <button class="btn btn-outline-info btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse" id="filterToggle">
+          <i class="fas fa-chevron-down me-1"></i>
+          <span id="filter-text">Mostrar Filtros</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="collapse" id="filterCollapse">
+    <div class="card-body bg-gradient" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+      <form method="get" class="row g-4">
+        <!-- Linha 1: Filtros Principais -->
+        <div class="col-lg-3 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.recipient }}
+            <label for="{{ filter.form.recipient.id_for_label }}">
+              <i class="fas fa-user text-info me-1"></i>{{ filter.form.recipient.label }}
+            </label>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <label for="{{ filter.form.status.id_for_label }}" class="form-label text-info fw-bold">
+            <i class="fas fa-circle-check me-1"></i>{{ filter.form.status.label }}
+          </label>
+          {{ filter.form.status }}
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.compensation_date_from }}
+            <label for="{{ filter.form.compensation_date_from.id_for_label }}">
+              <i class="fas fa-calendar text-success me-1"></i>{{ filter.form.compensation_date_from.label }}
+            </label>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.value_max }}
+            <label for="{{ filter.form.value_max.id_for_label }}">
+              <i class="fas fa-dollar-sign text-warning me-1"></i>{{ filter.form.value_max.label }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Linha 2: Filtros Secundários -->
+        <div class="col-lg-4 col-md-6">
+          <label for="{{ filter.form.account.id_for_label }}" class="form-label text-info fw-bold">
+            <i class="fas fa-university me-1"></i>{{ filter.form.account.label }}
+          </label>
+          {{ filter.form.account }}
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.number }}
+            <label for="{{ filter.form.number.id_for_label }}">
+              <i class="fas fa-hashtag text-info me-1"></i>{{ filter.form.number.label }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Linha 3: Botões de Ação -->
+        <div class="col-lg-4 col-md-12 d-flex align-items-end justify-content-md-end">
+          <div class="btn-group w-100 w-md-auto" role="group">
+            <button type="submit" class="btn btn-info px-4 text-white">
+              <i class="fas fa-search me-2"></i>Filtrar Cheques
+            </button>
+            <a href="{% url 'cheque-list' %}" class="btn btn-outline-secondary px-4">
+              <i class="fas fa-eraser me-2"></i>Limpar
+            </a>
+          </div>
+        </div>
+      </form>
+
+      <!-- Filtros Ativos (se houver) -->
+      {% if request.GET %}
+      <div class="mt-4 pt-3 border-top">
+        <div class="d-flex flex-wrap align-items-center">
+          <strong class="text-muted me-3">
+            <i class="fas fa-filter me-1"></i>Filtros Aplicados:
+          </strong>
+          {% for key, value in request.GET.items %}
+            {% if value and key != 'page' %}
+            <span class="badge bg-info me-2 mb-2">
+              {{ key|title }}: {{ value }}
+              <a href="?{% for k, v in request.GET.items %}{% if k != key and v %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="text-white ms-1">
+                <i class="fas fa-times"></i>
+              </a>
+            </span>
+            {% endif %}
+          {% endfor %}
+          <a href="{% url 'cheque-list' %}" class="btn btn-sm btn-outline-danger mb-2">
+            <i class="fas fa-times me-1"></i>Limpar Todos
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  #filterToggle:not(.collapsed) #filter-text::after {
+    content: " Filtros";
+  }
+  #filterToggle.collapsed #filter-text::after {
+    content: " Filtros";
+  }
+  #filterToggle:not(.collapsed) .fa-chevron-down {
+    transform: rotate(180deg);
+  }
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    opacity: .8;
+    transform: scale(.85) translateY(-.5rem) translateX(.15rem);
+  }
+  .btn-group .btn {
+    transition: all 0.2s ease;
+  }
+  .badge a:hover {
+    text-decoration: none;
+  }
+  @media (max-width: 768px) {
+    .btn-group {
+      flex-direction: column;
+    }
+    .btn-group .btn {
+      border-radius: 0.375rem !important;
+      margin-bottom: 0.5rem;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block table_headers %}
   <th>Número</th>
   <th>Valor</th>
@@ -41,4 +190,3 @@
 {% endblock %}
 
 {% block empty_colspan %}8{% endblock %}
-{% block empty_message %}Nenhum cheque cadastrado.{% endblock %}
