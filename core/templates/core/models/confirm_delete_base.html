@@ -1,8 +1,18 @@
 {% extends "paginasweb/models/base.html" %}
+{% load static %}
 {% block title %}{{ titulo }}{% endblock %}
 
+{% block extra_head %}
+{{ block.super }}
+<!-- Navbar Fix CSS para páginas internas -->
+<link href="{% static 'css/navbar-fix-v2.css' %}" rel="stylesheet" />
+{% endblock extra_head %}
+
+{% block body_class %}page-internal{% endblock body_class %}
+
 {% block content %}
-<div class="container my-5">
+  <div class="main-content">
+    <div class="container my-5">
   <div class="row justify-content-center">
     <div class="col-lg-6">
       <div class="card shadow-sm">
@@ -29,5 +39,5 @@
       </div>
     </div>
   </div>
-</div>
+  </div>
 {% endblock %}

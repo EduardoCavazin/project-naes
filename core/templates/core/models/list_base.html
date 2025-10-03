@@ -1,12 +1,19 @@
 {% extends "paginasweb/models/base.html" %}
+{% load static %}
 {% block title %}{{ titulo }}{% endblock %}
 
 {% block extra_head %}
+{{ block.super }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<!-- Navbar Fix CSS para páginas internas -->
+<link href="{% static 'css/navbar-fix-v2.css' %}" rel="stylesheet" />
 {% endblock extra_head %}
 
+{% block body_class %}page-internal{% endblock body_class %}
+
 {% block content %}
-  <div class="container my-5">
+  <div class="main-content">
+    <div class="container my-5">
     <!-- Cabeçalho com Título e Ações -->
     <div class="card shadow-sm border-0 mb-4">
       <div class="card-body bg-gradient" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -19,13 +26,9 @@
           </div>
           <div class="col-md-6 text-md-end mt-3 mt-md-0">
             <!-- Botões de Ação -->
-            <div class="btn-group" role="group">
-              <a href="{% url create_url_name %}" class="btn btn-light btn-lg me-2">
-                <i class="fas fa-plus me-1"></i> {{ create_button_label }}
-              </a>
-              <!-- Botões de Export (serão populados pelo DataTables) -->
-              <div id="export-buttons-container" class="d-inline-block"></div>
-            </div>
+            <a href="{% url create_url_name %}" class="btn btn-light btn-lg">
+              <i class="fas fa-plus me-1"></i> {{ create_button_label }}
+            </a>
           </div>
         </div>
       </div>
@@ -37,21 +40,17 @@
     <div class="card shadow-sm border-0">
       <div class="card-header bg-light border-bottom-0 py-3">
         <div class="row align-items-center">
-          <div class="col-md-6">
+          <div class="col-md-12">
             <h6 class="mb-0 text-muted">
               <i class="fas fa-table me-1"></i>Registros Encontrados
               <span id="records-count" class="badge bg-primary ms-2">{{ object_list|length }}</span>
             </h6>
           </div>
-          <div class="col-md-6">
-            <!-- Área para controles do DataTables -->
-            <div id="table-controls" class="d-flex justify-content-md-end"></div>
-          </div>
         </div>
       </div>
       <div class="card-body p-0">
         <div class="table-responsive">
-          <table class="table table-hover mb-0" id="{% block table_id %}data-table{% endblock %}">
+          <table class="table table-hover mb-0">
             <thead style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
               <tr>
                 {% block table_headers %}{% endblock %}
@@ -82,17 +81,78 @@
           </table>
         </div>
       </div>
-      <div class="card-footer bg-light border-top-0">
-        <!-- Área para paginação e informações do DataTables -->
-        <div id="table-footer" class="row align-items-center">
+      
+      <!-- Paginação Django Nativa -->
+      {% if is_paginated %}
+      <div class="card-footer bg-light border-top-0 py-3">
+        <div class="row align-items-center">
           <div class="col-md-6">
-            <div id="table-info-container"></div>
+            <small class="text-muted">
+              <i class="fas fa-info-circle me-1"></i>
+              Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+              ({{ page_obj.paginator.count }} registros no total)
+            </small>
           </div>
           <div class="col-md-6">
-            <div id="table-pagination-container" class="d-flex justify-content-md-end"></div>
+            <nav aria-label="Paginação">
+              <ul class="pagination pagination-sm justify-content-md-end mb-0">
+                {% if page_obj.has_previous %}
+                  <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page=1" aria-label="Primeira">
+                      <i class="fas fa-angle-double-left"></i>
+                    </a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Anterior">
+                      <i class="fas fa-angle-left"></i>
+                    </a>
+                  </li>
+                {% else %}
+                  <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+                  </li>
+                  <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-left"></i></span>
+                  </li>
+                {% endif %}
+
+                {% for page_num in page_obj.paginator.page_range %}
+                  {% if page_num == page_obj.number %}
+                    <li class="page-item active">
+                      <span class="page-link">{{ page_num }}</span>
+                    </li>
+                  {% elif page_num > page_obj.number|add:'-3' and page_num < page_obj.number|add:'3' %}
+                    <li class="page-item">
+                      <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_num }}">{{ page_num }}</a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                  <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Próximo">
+                      <i class="fas fa-angle-right"></i>
+                    </a>
+                  </li>
+                  <li class="page-item">
+                    <a class="page-link" href="?{% if request.GET.urlencode %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.paginator.num_pages }}" aria-label="Última">
+                      <i class="fas fa-angle-double-right"></i>
+                    </a>
+                  </li>
+                {% else %}
+                  <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-right"></i></span>
+                  </li>
+                  <li class="page-item disabled">
+                    <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+                  </li>
+                {% endif %}
+              </ul>
+            </nav>
           </div>
         </div>
       </div>
+      {% endif %}
     </div>
   </div>
 
@@ -152,4 +212,5 @@
       }
     }
   </style>
+  </div>
 {% endblock %}

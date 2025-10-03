@@ -1,0 +1,151 @@
+/* 
+ * Navbar Fix - Torna o header sempre visível em páginas internas
+ * Este CSS resolve o problema do header branco sumindo em páginas com fundo branco
+ * IMPORTANTE: Este CSS tem !important para sobrescrever os estilos originais
+ */
+
+/* Reset absoluto - força navbar visível sempre */
+#mainNav {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 9999 !important;
+  transition: all 0.3s ease-in-out !important;
+  transform: translate3d(0, 0, 0) !important;
+}
+
+/* Força cores visíveis em TODAS as páginas internas */
+.page-internal #mainNav,
+body.page-internal #mainNav {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+.page-internal #mainNav .navbar-brand,
+body.page-internal #mainNav .navbar-brand {
+  color: #212529 !important;
+  font-weight: 800 !important;
+}
+
+.page-internal #mainNav .navbar-brand:hover,
+.page-internal #mainNav .navbar-brand:focus,
+body.page-internal #mainNav .navbar-brand:hover,
+body.page-internal #mainNav .navbar-brand:focus {
+  color: #0085A1 !important;
+}
+
+.page-internal #mainNav .navbar-nav > li.nav-item > a.nav-link,
+body.page-internal #mainNav .navbar-nav > li.nav-item > a.nav-link {
+  color: #212529 !important;
+  font-weight: 600 !important;
+}
+
+.page-internal #mainNav .navbar-nav > li.nav-item > a.nav-link:hover,
+.page-internal #mainNav .navbar-nav > li.nav-item > a.nav-link:focus,
+body.page-internal #mainNav .navbar-nav > li.nav-item > a.nav-link:hover,
+body.page-internal #mainNav .navbar-nav > li.nav-item > a.nav-link:focus {
+  color: #0085A1 !important;
+}
+
+.page-internal #mainNav .navbar-toggler,
+body.page-internal #mainNav .navbar-toggler {
+  border-color: rgba(33, 37, 41, 0.3) !important;
+  color: #212529 !important;
+}
+
+/* Sobrescreve QUALQUER comportamento de scroll/fixed */
+.page-internal #mainNav.is-fixed,
+.page-internal #mainNav.is-visible,
+body.page-internal #mainNav.is-fixed,
+body.page-internal #mainNav.is-visible {
+  transform: translate3d(0, 0, 0) !important;
+  top: 0 !important;
+  position: fixed !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid #dee2e6 !important;
+}
+
+.page-internal #mainNav.is-fixed .navbar-brand,
+.page-internal #mainNav.is-visible .navbar-brand,
+body.page-internal #mainNav.is-fixed .navbar-brand,
+body.page-internal #mainNav.is-visible .navbar-brand {
+  color: #212529 !important;
+}
+
+.page-internal #mainNav.is-fixed .navbar-nav > li.nav-item > a,
+.page-internal #mainNav.is-visible .navbar-nav > li.nav-item > a,
+body.page-internal #mainNav.is-fixed .navbar-nav > li.nav-item > a,
+body.page-internal #mainNav.is-visible .navbar-nav > li.nav-item > a {
+  color: #212529 !important;
+}
+
+/* Dropdown menu styling */
+.page-internal #mainNav .dropdown-menu,
+body.page-internal #mainNav .dropdown-menu {
+  border: 1px solid #dee2e6 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  background-color: #fff !important;
+}
+
+.page-internal #mainNav .dropdown-item,
+body.page-internal #mainNav .dropdown-item {
+  color: #212529 !important;
+  font-weight: 500 !important;
+}
+
+.page-internal #mainNav .dropdown-item:hover,
+.page-internal #mainNav .dropdown-item:focus,
+body.page-internal #mainNav .dropdown-item:hover,
+body.page-internal #mainNav .dropdown-item:focus {
+  background-color: #f8f9fa !important;
+  color: #0085A1 !important;
+}
+
+/* Garante espaçamento para o conteúdo */
+.page-internal .main-content,
+body.page-internal .main-content {
+  padding-top: 100px !important;
+  min-height: calc(100vh - 100px) !important;
+}
+
+.page-internal .container.my-5,
+.page-internal .container.my-4,
+body.page-internal .container.my-5,
+body.page-internal .container.my-4 {
+  margin-top: 2rem !important;
+}
+
+/* Mobile */
+@media (max-width: 991.98px) {
+  .page-internal #mainNav,
+  body.page-internal #mainNav {
+    background-color: #fff !important;
+    border-bottom: 1px solid #dee2e6 !important;
+  }
+  
+  .page-internal .main-content,
+  body.page-internal .main-content {
+    padding-top: 80px !important;
+  }
+}
+
+/* Debug - remove se funcionar */
+.page-internal #mainNav:before,
+body.page-internal #mainNav:before {
+  content: "NAVBAR FIX ATIVO";
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: red;
+  color: white;
+  padding: 2px 8px;
+  font-size: 10px;
+  border-radius: 3px;
+  z-index: 10000;
+}

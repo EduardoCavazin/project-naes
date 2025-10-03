@@ -1,11 +1,9 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
-from django_filters.views import FilterView
 from django.db import models
 from .models import Expense, PaymentMethod, Cheque, Account, Category
 from .forms import ExpenseForm, ChequeForm
-from .filters import ExpenseFilter, ChequeFilter
 from django.contrib.auth.mixins import LoginRequiredMixin
 import datetime
 import calendar
@@ -72,10 +70,12 @@ class ExpenseCreate(LoginRequiredMixin, CreateView):
         
         return HttpResponseRedirect(self.success_url)
 
-class ExpenseList(LoginRequiredMixin, FilterView):
+class ExpenseList(LoginRequiredMixin, ListView):
+    """Lista de despesas com filtros client-side avançados"""
     model = Expense
-    filterset_class = ExpenseFilter
     template_name = 'core/expense/list.html'
+    # context_object_name = 'expenses'  # Usar padrão object_list
+    paginate_by = 100  # Mais registros para filtro client-side
     extra_context = {
         'titulo': 'Lista de Despesas',
         'create_url_name': 'expense-create',
@@ -86,25 +86,18 @@ class ExpenseList(LoginRequiredMixin, FilterView):
         # Mostrar apenas despesas do usuário logado com otimização de queries
         return Expense.objects.select_related(
             'category', 'payment_method', 'account'
-        ).filter(user=self.request.user)
-
-    def get_filterset_kwargs(self, filterset_class):
-        kwargs = super().get_filterset_kwargs(filterset_class)
-        # Limitar as opções dos filtros aos dados do usuário
-        if kwargs['data'] is None:
-            kwargs['data'] = {}
-        return kwargs
-
-    def get_filterset(self, filterset_class=None):
-        filterset = super().get_filterset(filterset_class)
-        # Personalizar querysets dos filtros para o usuário atual
+        ).filter(user=self.request.user).order_by('-date', '-id')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adicionar dados para filtros client-side
         user = self.request.user
-        filterset.filters['category'].queryset = Category.objects.filter(
+        context['categories'] = Category.objects.filter(
             models.Q(user=user) | models.Q(is_public=True)
         ).distinct()
-        filterset.filters['payment_method'].queryset = PaymentMethod.objects.filter(user=user)
-        filterset.filters['account'].queryset = Account.objects.filter(user=user)
-        return filterset
+        context['payment_methods'] = PaymentMethod.objects.filter(user=user)
+        context['accounts'] = Account.objects.filter(user=user)
+        return context
 
 class ExpenseUpdate(LoginRequiredMixin, UpdateView):
     model = Expense
@@ -151,10 +144,12 @@ class ChequeCreate(LoginRequiredMixin, CreateView):
         cheque.user = self.request.user  # Atribuir usuário automaticamente
         return super().form_valid(form)
 
-class ChequeList(LoginRequiredMixin, FilterView):
+class ChequeList(LoginRequiredMixin, ListView):
+    """Lista de cheques com filtros client-side avançados"""
     model = Cheque
-    filterset_class = ChequeFilter
     template_name = 'core/cheque/list.html'
+    # context_object_name = 'cheques'  # Usar padrão object_list
+    paginate_by = 100  # Mais registros para filtro client-side
     extra_context = {
         'titulo': 'Lista de Cheques',
         'create_url_name': 'cheque-create',
@@ -163,21 +158,15 @@ class ChequeList(LoginRequiredMixin, FilterView):
 
     def get_queryset(self):
         # Mostrar apenas cheques do usuário logado com otimização de queries
-        return Cheque.objects.select_related('account').filter(user=self.request.user)
-
-    def get_filterset_kwargs(self, filterset_class):
-        kwargs = super().get_filterset_kwargs(filterset_class)
-        # Limitar as opções dos filtros aos dados do usuário
-        if kwargs['data'] is None:
-            kwargs['data'] = {}
-        return kwargs
-
-    def get_filterset(self, filterset_class=None):
-        filterset = super().get_filterset(filterset_class)
-        # Personalizar querysets dos filtros para o usuário atual
-        user = self.request.user
-        filterset.filters['account'].queryset = Account.objects.filter(user=user)
-        return filterset
+        return Cheque.objects.select_related('account').filter(
+            user=self.request.user
+        ).order_by('-date', '-id')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adicionar dados para filtros client-side
+        context['accounts'] = Account.objects.filter(user=self.request.user)
+        return context
 
 class ChequeUpdate(LoginRequiredMixin, UpdateView):
     model = Cheque
@@ -222,6 +211,7 @@ class PaymentMethodCreate(LoginRequiredMixin, CreateView):
 class PaymentMethodList(LoginRequiredMixin, ListView):
     model = PaymentMethod
     template_name = 'core/payment_method/list.html'
+    paginate_by = 15  # Paginação Django nativa
     extra_context = {
         'titulo': 'Lista de Métodos de Pagamento',
         'create_url_name': 'paymentmethod-create',
@@ -296,6 +286,7 @@ class CategoryCreate(LoginRequiredMixin, CreateView):
 class CategoryList(LoginRequiredMixin, ListView):
     model = Category
     template_name = 'core/category/list.html'
+    paginate_by = 15  # Paginação Django nativa
     extra_context = {
         'titulo': 'Lista de Categorias',
         'create_url_name': 'category-create',
