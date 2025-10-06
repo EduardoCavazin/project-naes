@@ -1,0 +1,145 @@
+/* 
+ * Navbar Fix - Torna o header sempre visível em páginas internas
+ * Este CSS resolve o problema do header branco sumindo em páginas com fundo branco
+ */
+
+/* Aplicação base: força o navbar a ser visível sempre */
+#mainNav {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1030 !important;
+  transition: all 0.3s ease-in-out !important;
+}
+
+/* Força o navbar a ter fundo e cores visíveis em páginas internas */
+.page-internal #mainNav {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid #dee2e6 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+.page-internal #mainNav .navbar-brand {
+  color: #212529 !important;
+  font-weight: 800;
+}
+
+.page-internal #mainNav .navbar-brand:hover,
+.page-internal #mainNav .navbar-brand:focus {
+  color: #0085A1 !important;
+}
+
+.page-internal #mainNav .navbar-nav > li.nav-item > a.nav-link {
+  color: #212529 !important;
+  font-weight: 600;
+}
+
+.page-internal #mainNav .navbar-nav > li.nav-item > a.nav-link:hover,
+.page-internal #mainNav .navbar-nav > li.nav-item > a.nav-link:focus {
+  color: #0085A1 !important;
+}
+
+.page-internal #mainNav .navbar-toggler {
+  border-color: rgba(33, 37, 41, 0.3) !important;
+  color: #212529 !important;
+}
+
+/* Dropdown menu styling para páginas internas */
+.page-internal #mainNav .dropdown-menu {
+  border: 1px solid #dee2e6 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  border-radius: 8px !important;
+  background-color: #fff !important;
+}
+
+.page-internal #mainNav .dropdown-item {
+  color: #212529 !important;
+  font-weight: 500;
+}
+
+.page-internal #mainNav .dropdown-item:hover,
+.page-internal #mainNav .dropdown-item:focus {
+  background-color: #f8f9fa !important;
+  color: #0085A1 !important;
+}
+
+.page-internal #mainNav .dropdown-divider {
+  margin: 0.5rem 0 !important;
+  border-top: 1px solid #dee2e6 !important;
+}
+
+/* Garante que o conteúdo principal não fique escondido atrás do navbar */
+.page-internal .main-content {
+  padding-top: 100px !important;
+}
+
+.page-internal .container.my-5,
+.page-internal .container.my-4 {
+  margin-top: 2rem !important;
+}
+
+/* Mobile responsiveness para páginas internas */
+@media (max-width: 991.98px) {
+  .page-internal #mainNav {
+    background-color: #fff !important;
+    border-bottom: 1px solid #dee2e6 !important;
+  }
+  
+  .page-internal #mainNav .navbar-toggler {
+    border: 1px solid rgba(33, 37, 41, 0.2) !important;
+    border-radius: 4px !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+  
+  .page-internal #mainNav .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.25rem rgba(0, 133, 161, 0.25) !important;
+  }
+  
+  .page-internal #mainNav .navbar-collapse {
+    background-color: #fff !important;
+    border-top: 1px solid #dee2e6 !important;
+    margin-top: 1rem !important;
+    padding-top: 1rem !important;
+  }
+
+  .page-internal .main-content {
+    padding-top: 80px !important;
+  }
+}
+
+/* Melhora a aparência do toggle button */
+.page-internal #mainNav .navbar-toggler {
+  border: 1px solid rgba(33, 37, 41, 0.2) !important;
+  border-radius: 4px !important;
+  padding: 0.5rem 0.75rem !important;
+}
+
+.page-internal #mainNav .navbar-toggler:focus {
+  box-shadow: 0 0 0 0.25rem rgba(0, 133, 161, 0.25) !important;
+  outline: none !important;
+}
+
+/* Animações suaves */
+.page-internal #mainNav {
+  transition: all 0.3s ease-in-out !important;
+}
+
+.page-internal #mainNav .nav-link {
+  transition: color 0.2s ease-in-out !important;
+}
+
+.page-internal #mainNav .dropdown-item {
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Garante que a barra seja sempre visível, mesmo com scroll */
+.page-internal #mainNav.is-fixed {
+  transform: translate3d(0, 0, 0) !important;
+  top: 0 !important;
+}
+
+.page-internal #mainNav.is-visible {
+  transform: translate3d(0, 0, 0) !important;
+}

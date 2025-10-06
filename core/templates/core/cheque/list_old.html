@@ -1,0 +1,268 @@
+{% extends "core/models/list_base.html" %}
+{% load static %}
+
+{% block title %}Lista de Cheques{% endblock %}
+
+{% block page_icon %}money-check{% endblock %}
+{% block page_description %}Gerencie todos seus cheques e status de compensação{% endblock %}
+{% block empty_icon %}money-check-alt{% endblock %}
+{% block empty_message %}Nenhum cheque cadastrado{% endblock %}
+{% block empty_description %}Comece registrando seu primeiro cheque{% endblock %}
+
+{% block filters %}
+<div class="card mb-4 border-0 shadow-sm">
+  <div class="card-header bg-light border-0 py-3">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h5 class="mb-0 text-info">
+          <i class="fas fa-filter me-2"></i>Filtros de Cheques
+          <small class="text-muted ms-2">Encontre cheques específicos</small>
+        </h5>
+      </div>
+      <div class="col-md-4 text-end">
+        <button class="btn btn-outline-info btn-sm position-relative" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse" id="filterToggle">
+          <i class="fas fa-chevron-down me-1 transition-fast"></i>
+          <span id="filter-text">Mostrar Filtros</span>
+          {% if request.GET %}
+          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="filter-count">
+            {% for key, value in request.GET.items %}{% if value and key != 'page' %}{{ forloop.counter }}{% endif %}{% endfor %}
+          </span>
+          {% endif %}
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="collapse collapse-fast" id="filterCollapse">
+    <div class="card-body bg-gradient" style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+      <form method="get" class="row g-4">
+        <!-- Linha 1: Filtros Principais -->
+        <div class="col-lg-3 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.recipient }}
+            <label for="{{ filter.form.recipient.id_for_label }}">
+              <i class="fas fa-user text-info me-1"></i>{{ filter.form.recipient.label }}
+            </label>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <label for="{{ filter.form.status.id_for_label }}" class="form-label text-info fw-bold">
+            <i class="fas fa-circle-check me-1"></i>{{ filter.form.status.label }}
+          </label>
+          {{ filter.form.status }}
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.compensation_date_from }}
+            <label for="{{ filter.form.compensation_date_from.id_for_label }}">
+              <i class="fas fa-calendar text-success me-1"></i>{{ filter.form.compensation_date_from.label }}
+            </label>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.value_max }}
+            <label for="{{ filter.form.value_max.id_for_label }}">
+              <i class="fas fa-dollar-sign text-warning me-1"></i>{{ filter.form.value_max.label }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Linha 2: Filtros Secundários -->
+        <div class="col-lg-4 col-md-6">
+          <label for="{{ filter.form.account.id_for_label }}" class="form-label text-info fw-bold">
+            <i class="fas fa-university me-1"></i>{{ filter.form.account.label }}
+          </label>
+          {{ filter.form.account }}
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.number }}
+            <label for="{{ filter.form.number.id_for_label }}">
+              <i class="fas fa-hashtag text-info me-1"></i>{{ filter.form.number.label }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Linha 3: Botões de Ação -->
+        <div class="col-lg-4 col-md-12 d-flex align-items-end justify-content-md-end">
+          <div class="btn-group w-100 w-md-auto" role="group">
+            <button type="submit" class="btn btn-info px-4 text-white" id="filterSubmit">
+              <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true"></span>
+              <i class="fas fa-search me-2" id="search-icon"></i>Filtrar Cheques
+            </button>
+            <a href="{% url 'cheque-list' %}" class="btn btn-outline-secondary px-4" id="clearFilters">
+              <i class="fas fa-eraser me-2"></i>Limpar
+            </a>
+          </div>
+        </div>
+      </form>
+
+      <!-- Filtros Ativos (se houver) -->
+      {% if request.GET %}
+      <div class="mt-4 pt-3 border-top">
+        <div class="d-flex flex-wrap align-items-center">
+          <strong class="text-muted me-3">
+            <i class="fas fa-filter me-1"></i>Filtros Aplicados:
+          </strong>
+          {% for key, value in request.GET.items %}
+            {% if value and key != 'page' %}
+            <span class="badge bg-info me-2 mb-2">
+              {{ key|title }}: {{ value }}
+              <a href="?{% for k, v in request.GET.items %}{% if k != key and v %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="text-white ms-1">
+                <i class="fas fa-times"></i>
+              </a>
+            </span>
+            {% endif %}
+          {% endfor %}
+          <a href="{% url 'cheque-list' %}" class="btn btn-sm btn-outline-danger mb-2">
+            <i class="fas fa-times me-1"></i>Limpar Todos
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  #filterToggle:not(.collapsed) #filter-text::after {
+    content: " Filtros";
+  }
+  #filterToggle.collapsed #filter-text::after {
+    content: " Filtros";
+  }
+  #filterToggle:not(.collapsed) .fa-chevron-down {
+    transform: rotate(180deg);
+  }
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    opacity: .8;
+    transform: scale(.85) translateY(-.5rem) translateX(.15rem);
+  }
+  .btn-group .btn {
+    transition: all 0.2s ease;
+  }
+  .badge a:hover {
+    text-decoration: none;
+  }
+  @media (max-width: 768px) {
+    .btn-group {
+      flex-direction: column;
+    }
+    .btn-group .btn {
+      border-radius: 0.375rem !important;
+      margin-bottom: 0.5rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block table_headers %}
+  <th>Número</th>
+  <th>Valor</th>
+  <th>Data de Emissão</th>
+  <th>Data de Compensação</th>
+  <th>Beneficiário</th>
+  <th>Conta</th>
+  <th>Status</th>
+  <th class="text-end">Ações</th>
+{% endblock %}
+
+{% block table_row %}
+  <td>{{ obj.number }}</td>
+  <td>R$ {{ obj.value|floatformat:2 }}</td>
+  <td>{{ obj.issue_date }}</td>
+  <td>{{ obj.compensation_date }}</td>
+  <td>{{ obj.recipient }}</td>
+  <td>{{ obj.account.identifier }}</td>
+  <td>
+    {% if obj.status == 'pending' %}
+      <span class="badge bg-warning">Pendente</span>
+    {% elif obj.status == 'cashed' %}
+      <span class="badge bg-success">Compensado</span>
+    {% else %}
+      <span class="badge bg-danger">Cancelado</span>
+    {% endif %}
+  </td>
+  <td class="text-end">
+    <a href="{% url 'cheque-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
+      <i class="fas fa-edit"></i>
+    </a>
+    <a href="{% url 'cheque-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
+      <i class="fas fa-trash-alt"></i>
+    </a>
+  </td>
+{% endblock %}
+
+{% block empty_colspan %}8{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    console.log('✅ Filtros de cheques carregados - versão simplificada');
+    
+    // Aplicar máscara de valor no campo de filtro
+    $('#id_value_max').mask('#.##0,00', {
+        reverse: true,
+        placeholder: '0,00',
+        translation: {
+            '#': {pattern: /[0-9]/, optional: true}
+        }
+    });
+    
+    // Converter valor da máscara para formato Django antes do submit
+    $('form').on('submit', function() {
+        var valueField = $('#id_value_max');
+        if (valueField.val()) {
+            // Converter de "1.500,50" para "1500.50"
+            var cleanValue = valueField.val()
+                .replace(/\./g, '')  // Remove pontos dos milhares
+                .replace(',', '.');   // Troca vírgula por ponto decimal
+            valueField.val(cleanValue);
+        }
+    });
+    
+    // Controlar o botão de filtros (versão simplificada e testada)
+    $('#filterCollapse').on('show.bs.collapse', function () {
+        $('#filter-text').text('Ocultar Filtros');
+        $('#filter-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        $('#filterToggle').removeClass('btn-outline-info').addClass('btn-info text-white');
+    });
+    
+    $('#filterCollapse').on('hide.bs.collapse', function () {
+        $('#filter-text').text('Mostrar Filtros');
+        $('#filter-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        $('#filterToggle').removeClass('btn-info text-white').addClass('btn-outline-info');
+    });
+    
+    // Auto-abrir se há filtros ativos
+    {% if request.GET %}
+    var hasFilters = false;
+    {% for key, value in request.GET.items %}
+        {% if value and key != 'page' %}
+        hasFilters = true;
+        {% endif %}
+    {% endfor %}
+    if (hasFilters) {
+        $('#filterCollapse').collapse('show');
+    }
+    {% endif %}
+    
+    // Feedback visual simples para campos preenchidos
+    $('.form-control, .form-select').on('change input', function() {
+        if ($(this).val()) {
+            $(this).addClass('border-info');
+        } else {
+            $(this).removeClass('border-info');
+        }
+    });
+    
+    // Executar na inicialização
+    $('.form-control, .form-select').each(function() {
+        if ($(this).val()) {
+            $(this).addClass('border-info');
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,358 @@
+{% extends "core/models/list_base.html" %}
+{% load static %}
+
+{% block title %}Lista de Despesas{% endblock %}
+
+{% block page_icon %}money-bill-wave{% endblock %}
+{% block page_description %}Controle todas suas despesas em um só lugar{% endblock %}
+{% block empty_icon %}wallet{% endblock %}
+{% block empty_message %}Nenhuma despesa cadastrada{% endblock %}
+{% block empty_description %}Comece registrando sua primeira despesa{% endblock %}
+
+{% block filters %}
+<div class="card mb-4 border-0 shadow-sm">
+  <div class="card-header bg-light border-0 py-3">
+    <div class="row align-items-center">
+      <div class="col-md-8">
+        <h5 class="mb-0 text-primary">
+          <i class="fas fa-filter me-2"></i>Filtros Avançados
+          <small class="text-muted ms-2">Refine sua pesquisa</small>
+        </h5>
+      </div>
+      <div class="col-md-4 text-end">
+        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse" id="filterToggle">
+          <i class="fas fa-chevron-down me-1" id="filter-icon"></i>
+          <span id="filter-text">Mostrar Filtros</span>
+          {% if request.GET %}
+          {% for key, value in request.GET.items %}
+            {% if value and key != 'page' %}
+            <span class="badge bg-danger ms-2">{{ forloop.counter }}</span>
+            {% endif %}
+          {% endfor %}
+          {% endif %}
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="collapse" id="filterCollapse">
+    <div class="card-body bg-gradient" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+      <form method="get" class="row g-4">
+        <!-- Linha 1: Filtros Principais -->
+        <div class="col-lg-3 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.name }}
+            <label for="{{ filter.form.name.id_for_label }}">
+              <i class="fas fa-search text-primary me-1"></i>{{ filter.form.name.label }}
+            </label>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <label for="{{ filter.form.category.id_for_label }}" class="form-label text-primary fw-bold">
+            <i class="fas fa-tags me-1"></i>{{ filter.form.category.label }}
+          </label>
+          {{ filter.form.category }}
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.date_from }}
+            <label for="{{ filter.form.date_from.id_for_label }}">
+              <i class="fas fa-calendar text-success me-1"></i>{{ filter.form.date_from.label }}
+            </label>
+          </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+          <div class="form-floating">
+            {{ filter.form.value_max }}
+            <label for="{{ filter.form.value_max.id_for_label }}">
+              <i class="fas fa-dollar-sign text-warning me-1"></i>{{ filter.form.value_max.label }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Linha 2: Filtros Secundários -->
+        <div class="col-lg-4 col-md-6">
+          <label for="{{ filter.form.payment_method.id_for_label }}" class="form-label text-primary fw-bold">
+            <i class="fas fa-credit-card me-1"></i>{{ filter.form.payment_method.label }}
+          </label>
+          {{ filter.form.payment_method }}
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <label for="{{ filter.form.account.id_for_label }}" class="form-label text-primary fw-bold">
+            <i class="fas fa-university me-1"></i>{{ filter.form.account.label }}
+          </label>
+          {{ filter.form.account }}
+        </div>
+
+        <!-- Linha 3: Botões de Ação -->
+        <div class="col-lg-4 col-md-12 d-flex align-items-end justify-content-md-end">
+          <div class="btn-group w-100 w-md-auto" role="group">
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="fas fa-search me-2"></i>Filtrar Despesas
+            </button>
+            <a href="{% url 'expense-list' %}" class="btn btn-outline-secondary px-4">
+              <i class="fas fa-eraser me-2"></i>Limpar
+            </a>
+          </div>
+        </div>
+      </form>
+
+      <!-- Filtros Ativos (se houver) -->
+      {% if request.GET %}
+      <div class="mt-4 pt-3 border-top">
+        <div class="d-flex flex-wrap align-items-center">
+          <strong class="text-muted me-3">
+            <i class="fas fa-filter me-1"></i>Filtros Aplicados:
+          </strong>
+          {% for key, value in request.GET.items %}
+            {% if value and key != 'page' %}
+            <span class="badge bg-primary me-2 mb-2">
+              {{ key|title }}: {{ value }}
+              <a href="?{% for k, v in request.GET.items %}{% if k != key and v %}{{ k }}={{ v }}&{% endif %}{% endfor %}" class="text-white ms-1">
+                <i class="fas fa-times"></i>
+              </a>
+            </span>
+            {% endif %}
+          {% endfor %}
+          <a href="{% url 'expense-list' %}" class="btn btn-sm btn-outline-danger mb-2">
+            <i class="fas fa-times me-1"></i>Limpar Todos
+          </a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  /* ==== OTIMIZAÇÕES DE PERFORMANCE DOS FILTROS ==== */
+  
+  /* Transições ultra-rápidas para melhor UX */
+  .collapse-fast {
+    transition: height 0.2s ease !important;
+  }
+  
+  .transition-fast {
+    transition: all 0.15s ease !important;
+  }
+  
+  /* Toggle button melhorado */
+  #filterToggle {
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  
+  #filterToggle:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  #filterToggle .fas {
+    transition: transform 0.2s ease;
+  }
+  
+  #filterToggle:not(.collapsed) .fas {
+    transform: rotate(180deg);
+  }
+  
+  /* Loading states para botões */
+  #filterSubmit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+  
+  /* Campos de filtro com feedback visual */
+  .form-control:focus,
+  .form-select:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    transform: scale(1.02);
+    transition: all 0.15s ease;
+  }
+  
+  .form-floating > .form-control:focus ~ label,
+  .form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: var(--bs-primary);
+    opacity: 1;
+    transform: scale(.85) translateY(-.5rem) translateX(.15rem);
+  }
+  
+  /* Badges de filtros ativos com animação */
+  .badge {
+    animation: fadeInScale 0.3s ease;
+  }
+  
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .badge a {
+    transition: all 0.15s ease;
+  }
+  
+  .badge a:hover {
+    transform: scale(1.1);
+    text-decoration: none;
+  }
+  
+  /* Contador de filtros animado */
+  #filter-count {
+    animation: pulse 0.6s ease;
+  }
+  
+  @keyframes pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.1); }
+  }
+  
+  /* Botões com hover melhorado */
+  .btn-group .btn {
+    transition: all 0.2s ease;
+  }
+  
+  .btn-group .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  
+  /* Responsividade otimizada */
+  @media (max-width: 768px) {
+    .collapse-fast {
+      transition: height 0.15s ease !important;
+    }
+    
+    .btn-group {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .btn-group .btn {
+      border-radius: 0.375rem !important;
+      width: 100%;
+    }
+    
+    #filterToggle {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+  }
+  
+  /* Preload de estados para evitar FOUC */
+  .form-control,
+  .form-select,
+  .btn {
+    will-change: transform, box-shadow;
+  }
+</style>
+{% endblock %}
+
+{% block table_headers %}
+  <th>Nome</th>
+  <th>Descrição</th>
+  <th>Valor</th>
+  <th>Data</th>
+  <th>Categoria</th>
+  <th>Método</th>
+  <th>Conta</th>
+  <th class="text-end">Ações</th>
+{% endblock %}
+
+{% block table_row %}
+  <td>
+    {{ obj.name }}
+    {% if obj.installments > 1 %}
+    <span class="badge bg-info ms-1">{{ obj.installment_number }}/{{ obj.installments }}</span>
+    {% endif %}
+  </td>
+  <td>{{ obj.description }}</td>
+  <td>R$ {{ obj.value|floatformat:2 }}</td>
+  <td>{{ obj.date }}</td>
+  <td>{{ obj.category.name }}</td>
+  <td>{{ obj.payment_method.name }}</td>
+  <td>{{ obj.account.identifier }}</td>
+  <td class="text-end">
+    <a href="{% url 'expense-update' obj.pk %}" class="btn btn-sm btn-outline-secondary me-1">
+      <i class="fas fa-edit"></i>
+    </a>
+    <a href="{% url 'expense-delete' obj.pk %}" class="btn btn-sm btn-outline-danger">
+      <i class="fas fa-trash-alt"></i>
+    </a>
+  </td>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    console.log('✅ Filtros carregados - versão simplificada');
+    
+    // Aplicar máscara de valor no campo de filtro
+    $('#id_value_max').mask('#.##0,00', {
+        reverse: true,
+        placeholder: '0,00',
+        translation: {
+            '#': {pattern: /[0-9]/, optional: true}
+        }
+    });
+    
+    // Converter valor da máscara para formato Django antes do submit
+    $('form').on('submit', function() {
+        var valueField = $('#id_value_max');
+        if (valueField.val()) {
+            // Converter de "1.500,50" para "1500.50"
+            var cleanValue = valueField.val()
+                .replace(/\./g, '')  // Remove pontos dos milhares
+                .replace(',', '.');   // Troca vírgula por ponto decimal
+            valueField.val(cleanValue);
+        }
+    });
+    
+    // Controlar o botão de filtros (versão simplificada e testada)
+    $('#filterCollapse').on('show.bs.collapse', function () {
+        $('#filter-text').text('Ocultar Filtros');
+        $('#filter-icon').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+        $('#filterToggle').removeClass('btn-outline-primary').addClass('btn-primary text-white');
+    });
+    
+    $('#filterCollapse').on('hide.bs.collapse', function () {
+        $('#filter-text').text('Mostrar Filtros');
+        $('#filter-icon').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+        $('#filterToggle').removeClass('btn-primary text-white').addClass('btn-outline-primary');
+    });
+    
+    // Auto-abrir se há filtros ativos
+    {% if request.GET %}
+    var hasFilters = false;
+    {% for key, value in request.GET.items %}
+        {% if value and key != 'page' %}
+        hasFilters = true;
+        {% endif %}
+    {% endfor %}
+    if (hasFilters) {
+        $('#filterCollapse').collapse('show');
+    }
+    {% endif %}
+    
+    // Feedback visual simples para campos preenchidos
+    $('.form-control, .form-select').on('change input', function() {
+        if ($(this).val()) {
+            $(this).addClass('border-primary');
+        } else {
+            $(this).removeClass('border-primary');
+        }
+    });
+    
+    // Executar na inicialização
+    $('.form-control, .form-select').each(function() {
+        if ($(this).val()) {
+            $(this).addClass('border-primary');
+        }
+    });
+});
+</script>
+{% endblock %}

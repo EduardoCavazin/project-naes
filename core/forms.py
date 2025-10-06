@@ -60,7 +60,7 @@ class ExpenseForm(forms.ModelForm):
     value = BrazilianCurrencyField(
         label="Valor",
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
+            'class': 'form-control money-field',
             'placeholder': 'R$ 0,00',
         })
     )
@@ -77,12 +77,17 @@ class ExpenseForm(forms.ModelForm):
             'account',
         ]
         widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome da despesa'}),
+            'description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Descrição da despesa'}),
             'date': forms.DateInput(attrs={
                 'type': 'text',
                 'class': 'form-control',
                 'placeholder': 'dd/mm/aaaa',
                 'data-mask': '00/00/0000',
             }, format='%d/%m/%Y'),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'payment_method': forms.Select(attrs={'class': 'form-select'}),
+            'account': forms.Select(attrs={'class': 'form-select'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -121,7 +126,7 @@ class ChequeForm(forms.ModelForm):
     value = BrazilianCurrencyField(
         label="Valor",
         widget=forms.TextInput(attrs={
-            'class': 'form-control',
+            'class': 'form-control money-field',
             'placeholder': 'R$ 0,00',
         })
     )
@@ -138,6 +143,10 @@ class ChequeForm(forms.ModelForm):
             'status',
         ]
         widgets = {
+            'number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Número do cheque'}),
+            'recipient': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome do beneficiário'}),
+            'account': forms.Select(attrs={'class': 'form-select'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
             'issue_date': forms.DateInput(attrs={
                 'type': 'text',
                 'class': 'form-control',

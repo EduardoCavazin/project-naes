@@ -10839,3 +10839,129 @@ header.masthead .post-heading .meta a {
     padding-left: 2rem;
   }
 }
+
+/* ====== ESTILOS PARA FILTROS AVANÇADOS ====== */
+
+/* Botão de toggle de filtros */
+.filter-toggle {
+  transition: all 0.3s ease;
+  border-radius: 0.5rem !important;
+}
+
+.filter-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.filter-toggle i {
+  transition: transform 0.3s ease;
+}
+
+/* Área de filtros */
+.filter-collapse {
+  transition: all 0.3s ease;
+}
+
+.filter-collapse .card-body {
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* Campos de filtro com valor */
+.form-control.has-value,
+.form-select.has-value {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 0.2rem rgba(0, 133, 161, 0.15);
+  background-color: rgba(0, 133, 161, 0.05);
+}
+
+/* Badges de filtros ativos */
+.filter-badge {
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, var(--bs-primary) 0%, rgba(0, 133, 161, 0.8) 100%);
+}
+
+.filter-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.filter-badge .remove-filter {
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.filter-badge .remove-filter:hover {
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Contador de filtros */
+.filter-count {
+  animation: pulse 1s ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+/* Botões de ação de filtros */
+.filter-actions .btn {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.filter-actions .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* Loading state para botões de filtro */
+.btn.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Responsividade para filtros */
+@media (max-width: 768px) {
+  .filter-toggle {
+    width: 100%;
+    margin-top: 1rem;
+  }
+  
+  .filter-actions .btn-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .filter-actions .btn {
+    margin-bottom: 0.5rem;
+    width: 100%;
+  }
+  
+  .filter-badge {
+    margin-bottom: 0.5rem;
+    display: block;
+    width: fit-content;
+  }
+}
+
+/* Animações suaves para collapse */
+.collapsing {
+  transition: height 0.35s ease;
+}
+
+/* Destaque para seção de filtros ativos */
+.active-filters-section {
+  background: linear-gradient(135deg, rgba(0, 133, 161, 0.05) 0%, rgba(0, 133, 161, 0.02) 100%);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-left: 4px solid var(--bs-primary);
+}

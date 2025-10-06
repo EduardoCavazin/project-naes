@@ -6,12 +6,15 @@
  * @returns {Chart} - Instância do gráfico criado
  */
 function initAreaChart(elementId, monthLabels, monthlyData) {
+    // Debug logs (opcional - pode remover depois)
+    console.log('AreaChart: Initializing with data:', monthlyData);
+    
     // Dados para o gráfico de área
     const chartData = {
         labels: monthLabels,
         datasets: [{
             label: 'Despesas Mensais',
-            lineTension: 0.3,
+            lineTension: 0.1,
             backgroundColor: 'rgba(78, 115, 223, 0.05)',
             borderColor: 'rgba(78, 115, 223, 1)',
             pointRadius: 3,
@@ -48,6 +51,8 @@ function initAreaChart(elementId, monthLabels, monthlyData) {
                     }
                 },
                 y: {
+                    beginAtZero: true,
+                    suggestedMax: Math.max(...monthlyData) * 1.1,
                     ticks: {
                         maxTicksLimit: 5,
                         callback: function(value) {

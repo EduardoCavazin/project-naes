@@ -73,6 +73,11 @@ class Expense(Transaction):
     
     def __str__(self):
         return self.name
+    
+    class Meta:
+        ordering = ['-date', '-id']  # Ordenar por data mais recente, depois por ID
+        verbose_name = "Despesa"
+        verbose_name_plural = "Despesas"
 
 
 class Cheque(Transaction):
@@ -90,6 +95,11 @@ class Cheque(Transaction):
     
     def __str__(self):
         return f"Cheque {self.number} - {self.recipient}"
+    
+    class Meta:
+        ordering = ['-compensation_date', '-id']  # Ordenar por data de compensação mais recente
+        verbose_name = "Cheque"
+        verbose_name_plural = "Cheques"
     
     def save(self, *args, **kwargs):
         # Garantir que o tipo seja sempre 'cheque'

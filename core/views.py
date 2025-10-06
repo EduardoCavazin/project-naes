@@ -1,6 +1,7 @@
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect
+from django.db import models
 from .models import Expense, PaymentMethod, Cheque, Account, Category
 from .forms import ExpenseForm, ChequeForm
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -70,17 +71,33 @@ class ExpenseCreate(LoginRequiredMixin, CreateView):
         return HttpResponseRedirect(self.success_url)
 
 class ExpenseList(LoginRequiredMixin, ListView):
+    """Lista de despesas com filtros client-side avançados"""
     model = Expense
     template_name = 'core/expense/list.html'
+    # context_object_name = 'expenses'  # Usar padrão object_list
+    paginate_by = 100  # Mais registros para filtro client-side
     extra_context = {
-    'titulo': 'Lista de Despesas',
-    'create_url_name': 'expense-create',
-    'create_button_label': 'Nova Despesa'
+        'titulo': 'Lista de Despesas',
+        'create_url_name': 'expense-create',
+        'create_button_label': 'Nova Despesa'
     }
-    
+
     def get_queryset(self):
-        # Mostrar apenas despesas do usuário logado
-        return Expense.objects.filter(user=self.request.user)
+        # Mostrar apenas despesas do usuário logado com otimização de queries
+        return Expense.objects.select_related(
+            'category', 'payment_method', 'account'
+        ).filter(user=self.request.user).order_by('-date', '-id')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adicionar dados para filtros client-side
+        user = self.request.user
+        context['categories'] = Category.objects.filter(
+            models.Q(user=user) | models.Q(is_public=True)
+        ).distinct()
+        context['payment_methods'] = PaymentMethod.objects.filter(user=user)
+        context['accounts'] = Account.objects.filter(user=user)
+        return context
 
 class ExpenseUpdate(LoginRequiredMixin, UpdateView):
     model = Expense
@@ -128,17 +145,28 @@ class ChequeCreate(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 class ChequeList(LoginRequiredMixin, ListView):
+    """Lista de cheques com filtros client-side avançados"""
     model = Cheque
     template_name = 'core/cheque/list.html'
+    # context_object_name = 'cheques'  # Usar padrão object_list
+    paginate_by = 100  # Mais registros para filtro client-side
     extra_context = {
         'titulo': 'Lista de Cheques',
         'create_url_name': 'cheque-create',
         'create_button_label': 'Novo Cheque'
     }
-    
+
     def get_queryset(self):
-        # Mostrar apenas cheques do usuário logado
-        return Cheque.objects.filter(user=self.request.user)
+        # Mostrar apenas cheques do usuário logado com otimização de queries
+        return Cheque.objects.select_related('account').filter(
+            user=self.request.user
+        ).order_by('-date', '-id')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adicionar dados para filtros client-side
+        context['accounts'] = Account.objects.filter(user=self.request.user)
+        return context
 
 class ChequeUpdate(LoginRequiredMixin, UpdateView):
     model = Cheque
@@ -183,6 +211,7 @@ class PaymentMethodCreate(LoginRequiredMixin, CreateView):
 class PaymentMethodList(LoginRequiredMixin, ListView):
     model = PaymentMethod
     template_name = 'core/payment_method/list.html'
+    paginate_by = 15  # Paginação Django nativa
     extra_context = {
         'titulo': 'Lista de Métodos de Pagamento',
         'create_url_name': 'paymentmethod-create',
@@ -257,6 +286,7 @@ class CategoryCreate(LoginRequiredMixin, CreateView):
 class CategoryList(LoginRequiredMixin, ListView):
     model = Category
     template_name = 'core/category/list.html'
+    paginate_by = 15  # Paginação Django nativa
     extra_context = {
         'titulo': 'Lista de Categorias',
         'create_url_name': 'category-create',
@@ -264,9 +294,9 @@ class CategoryList(LoginRequiredMixin, ListView):
     }
     
     def get_queryset(self):
-        # Mostrar categorias do usuário + categorias públicas
+        # Mostrar categorias do usuário + categorias públicas com otimização
         from django.db.models import Q
-        return Category.objects.filter(
+        return Category.objects.select_related('user').filter(
             Q(user=self.request.user) | Q(is_public=True)
         ).distinct()
 
